@@ -1,0 +1,9 @@
+/_archive
+/_misc
+/test
+_solex.leo
+**/.leo_shadow
+**/__pycache__
+*.jpg
+*.jpeg
+*.bam
