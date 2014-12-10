@@ -15,7 +15,6 @@ patch out float dist;
 // Uniform.
 uniform mat4 p3d_ModelViewMatrix;
 uniform vec3 geom_lod[8];
-uniform vec2 tex_lod[4];
 
 // Main.
 void main()
@@ -37,15 +36,6 @@ void main()
         }
     }
     
-    // Find tex lod from cam dist.  // FIX
-    float tex_multi = 1;
-    for (int i=0; i<4; i++) {
-        if (dist < tex_lod[i].x) {
-            tex_multi = tex_lod[i].y;
-            break;
-        }
-    }
-    
     // Set tess levels.
     gl_TessLevelInner[0] = tess_inner;
     gl_TessLevelOuter[0] = tess_outer;
@@ -55,6 +45,6 @@ void main()
     // Map inputs to outputs.
     tc_verts[gl_InvocationID] = verts[gl_InvocationID];
     tc_map_uvs[gl_InvocationID] = map_uvs[gl_InvocationID];
-    tc_tex_uvs[gl_InvocationID] = tex_uvs[gl_InvocationID] * tex_multi;
+    tc_tex_uvs[gl_InvocationID] = tex_uvs[gl_InvocationID];
 }
 

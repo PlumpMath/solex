@@ -35,20 +35,16 @@ class Texture_Manager:
         norm_tex.load(norm_img)
         planet.LOD_NP.setShaderInput("norm_tex", norm_tex)
         
-        # Apply terrain textures.
-        for i, terrain in enumerate(planet.terrains):
-            tex_img = PNMImage()
-            for tex_type in ("tex_near", "tex_far"):
-                tex_name = terrain[tex_type]
+        # Terrain textures.
+        for terrain in planet.terrains:
+            tex_array = Texture()
+            tex_array.setup2dTextureArray(2)
+            for i, tex_name in enumerate(terrain['textures']):
+                tex_img = PNMImage()
                 tex_img.read(Filename("{}/textures/{}".format(planet.path, tex_name)))
-                tex = Texture()
-                tex.load(tex_img)
-                ## tex.setMinfilter(Texture.FTLinear)
-                ## tex.setMagfilter(Texture.FTLinear)
-                ## tex.setAnisotropicDegree(2)
-                ts = TextureStage(str(i))
-                ts.setSort(i)
-                planet.LOD_NP.setTexture(ts, tex, i*10)
-
+                tex_array.load(tex_img, i, 0)
+            planet.LOD_NP.setShaderInput("tex_array", tex_array)  ## temp for mono terrain
+    
     def __new__(self):
         return None
+

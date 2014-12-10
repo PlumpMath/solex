@@ -62,23 +62,13 @@ class Shader_Manager:
         geom_lod = PTA_LVecBase3f(geom_lod_list)
         planet.LOD_NP.setShaderInput("geom_lod", geom_lod)
         
-        # Texture Blend.
-        near, far, threshold = planet.tex_blend
-        if threshold <= 4: threshold *= planet.radius
-        planet.LOD_NP.setShaderInput("tex_blend", LVector3f(near, far, threshold))
-        
-        # Texture tesselation.
-        tex_lod_list = [LVector2f(x*0,0) for x in range(8)]
-        for i, (dist, multi) in enumerate(planet.tex_lod):
-            tex_lod_list[i].set(dist, multi)
-        tex_lod = PTA_LVecBase2f(tex_lod_list)
+        # Texture LOD (tesselation).
+        planet.tex_lod.append((planet.tex_lod[-1][1],9999999,1))
+        tex_lod_list = [LVector3f(x*0,0) for x in range(5)]
+        for i, (near, far, multi) in enumerate(planet.tex_lod):
+            tex_lod_list[i].set(near, far, multi)
+        tex_lod = PTA_LVecBase3f(tex_lod_list)
         planet.LOD_NP.setShaderInput("tex_lod", tex_lod)
-        
-        '''for i, (dist, inner, outer) in enumerate(planet.near_lod):
-            print(i, dist, inner, outer)
-            ## tess_levels.setElement(i, LVector3f(dist, inner, outer))'''
-        
-        
 
     def __new__(self):
         return None

@@ -15,8 +15,7 @@ class Earth(Terrestrial):
     terrains = (
     
         {'name':            "land",
-         'tex_near':        "land_near.jpg",
-         'tex_far':         "land_far.jpg",
+         'textures':        ("land_near.jpg", "land_far.jpg", "land_far.jpg", "land_far.jpg"),
          'alt_range':       (0,100)},
          
     )

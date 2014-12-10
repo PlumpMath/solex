@@ -297,3 +297,4 @@ class Planet:
         ## if "max_elevation" not in self.__dict__:
         ## self.LOD_NP.setAttrib(RenderModeAttrib.make(2))
 
+
