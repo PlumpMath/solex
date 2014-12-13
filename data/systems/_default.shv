@@ -1,0 +1,16 @@
+
+// Default planet_gen system.
+
+star("G2V") Sol:
+    $aphelion       0
+    $sm_axis        0
+    $inclination    0
+    $spin           0
+    
+    planet Earth:
+        $aphelion       152098232
+        $sm_axis        149598261
+        $perhilion      147098290
+        $inclination    0
+        $spin           24
+

@@ -19,9 +19,9 @@ uniform vec4 terrain_specs;
 uniform mat4 p3d_ModelViewProjectionMatrix;
 uniform mat4 p3d_ModelViewMatrix;
 uniform mat3 p3d_NormalMatrix;
-uniform sampler2D map_tex;
-uniform sampler2D col_tex;
-uniform sampler2D norm_tex;
+uniform sampler2D height_map;
+uniform sampler2D normal_map;
+uniform sampler2D col_map;
 
 
 // Main.
@@ -48,12 +48,12 @@ void main()
     #ifdef height_map_on
     float min_height = terrain_specs[0];
     float elev_range = terrain_specs[1];
-    float map_val = texture(map_tex, map_uv)[0];
+    float map_val = texture(height_map, map_uv)[0];
     float map_height = min_height + (map_val*elev_range);
     float elev_ratio = map_height / radius;
     vert = vert * elev_ratio;
     // Normal mapping.
-    vec3 map_norm = texture(norm_tex, map_uv).xyz;
+    vec3 map_norm = texture(normal_map, map_uv).xyz;
     te_normal = normalize(p3d_NormalMatrix*(map_norm+te_normal));
     te_eye_vec = -(p3d_ModelViewMatrix * vec4(vert, 1.0)).xyz;
     #endif
@@ -64,7 +64,7 @@ void main()
     
     // Color mapping.
     #ifdef colour_map_on
-    te_color = texture(col_tex, map_uv);
+    te_color = texture(col_map, map_uv);
     #endif
     
     // Texture mapping.

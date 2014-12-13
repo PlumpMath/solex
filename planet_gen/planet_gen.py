@@ -10,6 +10,8 @@ from panda3d.core import ClockObject, RenderModeAttrib
 from panda3d.core import LVector3f, LVector3d, LPoint3f
 
 # Local imports.
+from etc.settings import _path
+from etc.shiva import Shiva_Compiler as SI
 from gui.ueh import Default_UEH
 from solex.environment import Environment
 
@@ -18,10 +20,11 @@ class Planet_Gen:
     
     cmd_map = {'exit':"escape"}
     
-    def launch(self, sys_recipe, focus_name):
+    def launch(self, focus_name):
         self._alive = True
         self.UEH = Default_UEH()
         self.ENV = Environment()
+        sys_recipe = SI.compile_sys_recipe("{}/_default.shv".format(_path.SYSTEMS))
         self.ENV.load_system(sys_recipe, focus_name)
         taskMgr.add(self._main_loop_, "main_loop", appendTask=True, sort=0)
         

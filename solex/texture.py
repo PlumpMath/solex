@@ -13,32 +13,32 @@ from etc.settings import _path
 class Texture_Manager:
     
     @classmethod
-    def set_textures(cls, planet):
+    def set_planet_textures(cls, planet):
         # Terrain map texture.
         map_img = PNMImage()
         map_img.read(Filename("{}/maps/{}".format(planet.path, planet.height_map)))
         map_tex = Texture()
         map_tex.load(map_img)
-        planet.LOD_NP.setShaderInput("map_tex", map_tex)
+        planet.LOD_NP.setShaderInput("height_map", map_tex)
         
         # Colour map texture.
         col_img = PNMImage()
         col_img.read(Filename("{}/maps/{}".format(planet.path, planet.colour_map)))
         col_tex = Texture()
         col_tex.load(col_img)
-        planet.LOD_NP.setShaderInput("col_tex", col_tex)
+        planet.LOD_NP.setShaderInput("col_map", col_tex)
         
         # Normal map texture.
         norm_img = PNMImage()
         norm_img.read(Filename("{}/maps/{}".format(planet.path, planet.normal_map)))
         norm_tex = Texture()
         norm_tex.load(norm_img)
-        planet.LOD_NP.setShaderInput("norm_tex", norm_tex)
-        
+        planet.LOD_NP.setShaderInput("normal_map", norm_tex)
+        print(planet.terrains)
         # Terrain textures.
         for terrain in planet.terrains:
             tex_array = Texture()
-            tex_array.setup2dTextureArray(2)
+            tex_array.setup2dTextureArray(4)
             for i, tex_name in enumerate(terrain['textures']):
                 tex_img = PNMImage()
                 tex_img.read(Filename("{}/textures/{}".format(planet.path, tex_name)))
@@ -47,4 +47,3 @@ class Texture_Manager:
     
     def __new__(self):
         return None
-

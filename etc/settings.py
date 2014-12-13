@@ -14,7 +14,9 @@ class _path:
     SOLEX = solex_dir.replace("E:", "/e").replace("\\", "/")
     BODIES = "{}/data/bodies".format(SOLEX)
     MODELS = "{}/data/models".format(SOLEX)
+    SYSTEMS = "{}/data/systems".format(SOLEX)
     SHADERS = "{}/gpu/shaders".format(SOLEX)
+    PLANET_GEN = "{}/planet_gen/saved".format(SOLEX)
 
 # -----------
 # Environment

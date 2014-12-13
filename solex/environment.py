@@ -201,10 +201,10 @@ class System:
     def __load_System(self, sys_recipe):
         """Load the system given in recipe, return a dict mapping body
         names to body objects."""
-        ClassType = type(self.__class__)
+        
         def load_body(body_sys_recipe, parent, b_dict={}):
             """Load and init each body and its satellites."""
-            Body = globals()[body_sys_recipe.type.title()]
+            Body = globals()[body_sys_recipe.type.title()]  ## here
             body_name = body_sys_recipe.__name__.lower()
             body = Body(body_name, body_sys_recipe)
             b_dict[body_name] = body
@@ -212,17 +212,16 @@ class System:
             parent.SATS.append(body)
                 
             # Call load_body on any satellites of this body.
-            for attr in list(body_sys_recipe.__dict__.values()):
-                if type(attr) == ClassType:
-                    b_dict = load_body(attr, body, b_dict)
+            for attr in body_sys_recipe['sats']:
+                b_dict = load_body(attr, body, b_dict)
             return b_dict
         
         # Step through recipe and recursively load system.
         b_dict = {}
-        for attr in list(sys_recipe.__dict__.values()):
-            if type(attr) == ClassType:
-                b_dict = load_body(attr, self, b_dict)
-
+        for attr in sys_recipe['sats']:
+            b_dict = load_body(attr, self, b_dict)
+        print("BBBBB")
+        print(b_dict)
         return b_dict
 
 
@@ -265,8 +264,7 @@ class Planet:
     
     def __init__(self, name, body_sys_recipe):
         self.name = name
-        self.path = "{}/{}".format(_path.BODIES, name.lower())
-        self.model_path = "{}/{}.bam".format(self.path, name.lower())
+        self.model_path = "{}/{}.bam".format(body_sys_recipe.path, name.lower())
         
         # Nodepaths and LODs.
         self.NP = NodePath(name)
@@ -291,7 +289,7 @@ class Planet:
 
         # Shaders and textures.
         SM.set_planet_shader(self)
-        TM.set_textures(self)
+        TM.set_planet_textures(self)
         
         # Render wireframe for crude models.
         ## if "max_elevation" not in self.__dict__:

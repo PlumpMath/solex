@@ -15,8 +15,9 @@ uniform mat4 p3d_ModelViewMatrix;
 uniform vec3 light_dir;
 uniform float ambient_val;
 uniform vec3 tex_lod[4];
-uniform sampler2DArray tex_array;  // temp for mono terrain prototype.
-
+// uniform sampler2DArray p3d_Texture3;
+uniform sampler2DArray tex_array;
+// need terrain types as integer indices from tese shader.
 
 // Main.
 void main()
@@ -27,14 +28,15 @@ void main()
     float intensity = max(dot(te_normal, light_vec), 0.0) * 4.0;
     vec4 color = te_color;
     // Terrain texturing.
-    float tex_master_blend = clamp(((1200-te_dist)/1200), 0, 1);
+    float lod_radius = tex_lod[3][1];
+    float tex_master_blend = clamp(((lod_radius-te_dist)/lod_radius), 0, 1);
     vec4 tex_col = vec4(0);  // Track blending of texture values 
     if (tex_master_blend > 0) {
         float prev_far = 0.0;
         // Check each tex lod level and blend in each one's contribution
         // based on this frags distance from the camera (te_dist).
         for (int i=0; i<4; i++) {
-            vec3 lod = tex_lod[i];  // lod.x -> near, lod.y -> far, lod.z -> tex_uv_multi
+            vec3 lod = tex_lod[i];  // lod.x = near, lod.y = far, lod.z = tex_uv_multi
             float next_near = tex_lod[i+1].x;
             if (te_dist > lod.x && te_dist <= lod.y) {
                 vec4 current_tex_col = texture(tex_array, vec3(te_tex_uv*lod.z, i));

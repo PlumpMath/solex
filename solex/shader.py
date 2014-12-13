@@ -45,11 +45,11 @@ class Shader_Manager:
         
         # Set shader inputs.
         planet.LOD_NP.setShaderInput("radius", float(planet.radius))
-        planet.LOD_NP.setShaderInput("light_dir", LVector3f(-1,0,0))
+        planet.LOD_NP.setShaderInput("light_dir", LVector3f(1,0,0))
         
         # Terrain specs.
-        min_radius = planet.radius - planet.min_elevation
-        elev_range = planet.max_elevation - planet.min_elevation
+        min_radius = planet.radius - planet.height_min
+        elev_range = planet.height_max - planet.height_min
         terrain_specs = LVector4f(min_radius, elev_range, 0, 0)
         planet.LOD_NP.setShaderInput("terrain_specs", terrain_specs)
         planet.LOD_NP.setShaderInput("ambient_val", _env.AMBIENT_FACTOR)
@@ -63,13 +63,13 @@ class Shader_Manager:
         planet.LOD_NP.setShaderInput("geom_lod", geom_lod)
         
         # Texture LOD (tesselation).
-        planet.tex_lod.append((planet.tex_lod[-1][1],9999999,1))
-        tex_lod_list = [LVector3f(x*0,0) for x in range(5)]
+        tex_lod_list = [LVector3f(x*0,0) for x in range(len(planet.tex_lod))]
         for i, (near, far, multi) in enumerate(planet.tex_lod):
             tex_lod_list[i].set(near, far, multi)
         tex_lod = PTA_LVecBase3f(tex_lod_list)
         planet.LOD_NP.setShaderInput("tex_lod", tex_lod)
-
+        
+        
     def __new__(self):
         return None
 

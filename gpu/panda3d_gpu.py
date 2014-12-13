@@ -32,6 +32,8 @@ class TimeIt:
         self.total_time = self.__dur
 
 class GPU_Image:
+    
+    lib_path = "/e/dev/solex/gpu/gpu_image_lib.glsl"
         
     def __init__(self, ref_img,
                        workgroup_size = LVector3i(32,32,1),
@@ -49,7 +51,7 @@ class GPU_Image:
         
         self.__NP = NodePath("gpu")
         self.__gsg = base.win.getGsg()
-        self.__ref_tex = self.__generate_Ref_Tex(ref_img)
+        self.__ref_tex = self.__get_Texture(ref_img)
         self.__LINES = self.__Setup()
         self.__print_times = print_times
     
@@ -71,7 +73,7 @@ class GPU_Image:
             print("  extract: {}  ({}%)".format(extr_time, round(extr_time/total_time*100),2))
             
     
-    def __generate_Ref_Tex(self, ref_img):
+    def __get_Texture(self, ref_img):
         # Convert ref_img into texture.
         with TimeIt() as prep_timer:
             ref_tex = Texture()
@@ -82,7 +84,7 @@ class GPU_Image:
             # Load tex and set format
             ref_tex.load(ref_img)
             ref_tex.setFormat(self.img_format)
-        self.prepare_time = round(prep_timer.total_time, 3)
+        self.prepare_time += round(prep_timer.total_time, 3)
         return ref_tex
 
     def __Setup(self):
@@ -91,7 +93,7 @@ class GPU_Image:
         
         # Open the shader as a file and get lines so we
         # can extract some setup info from it.
-        shader_os_path = Filename("./gpu_lib/gpu_image_lib.glsl").toOsLongName()
+        shader_os_path = Filename(self.lib_path).toOsLongName()
         with open(shader_os_path, "r") as shader_file:
             lines = list(shader_file.readlines())
         
@@ -151,15 +153,17 @@ class GPU_Image:
             mod_tex.setMinfilter(Texture.FTLinear)
             mod_tex.setFormat(self.img_format)
         self.prepare_time += prep_timer.total_time
-            
+        
         # Pass textures to shader.
         self.__NP.setShaderInput("ref_tex", self.__ref_tex)
         self.__NP.setShaderInput("mod_tex", mod_tex)
         
         # Set any additional required inputs for this function.
         for input_name, input_val in list(kwargs.items()):
+            if type(input_val) == PNMImage:
+                input_val = self.__get_Texture(input_val)
             self.__NP.setShaderInput(input_name, input_val)
-                
+        
         # Call function in shader library.
         shader_attrib = self.__NP.getAttrib(ShaderAttrib)
         with TimeIt() as proc_timer:

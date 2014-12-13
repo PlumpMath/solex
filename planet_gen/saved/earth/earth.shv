@@ -1,0 +1,38 @@
+
+// Earth.
+warm terran Earth:
+    $radius         6371
+    $height_max     8.848 * 4
+    $height_min     -11.103 * 5 - .25
+    $height_map     "earth_near.jpg"
+    $normal_map     "earth_norm.jpg"
+    $colour_map     "earth_colour.jpg"
+    $terrain_map    "earth_terrain.png"
+    
+    terrain Land:
+        $alt_range  0->100
+        $textures   "land_near.jpg", "land_near.jpg", "land_near.jpg", "land_far.jpg"
+
+// Demo animate statement ("animate" qualifier.)
+animate:
+    if $TARGET:
+        if velocity($TARGET) > 100:
+            push("adj_thrust", normalize(position_to($TARGET)) * extract($E, 100))
+    if "die" in $CMDS:
+        die()
+            
+// Demo when statement ("active" qualifier.)
+when distance($TARGET) < 120000:
+    push("nav_comp_prepare_approach")
+    push("gui_change_mode_approach")
+    reset when distance($TARGET) > 140000
+
+// Demo commmand ("responsive" qualifier.)
+command left_thruster_fire(e_val):
+    force = energize($fuel_rod, e_val)
+    if force:
+        accelerate(force)
+        pull("left_thruster_fire")
+    
+
+
