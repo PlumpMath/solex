@@ -1,0 +1,18 @@
+
+// Earth.
+warm terran Earth:
+    $radius         6371
+    $height_max     8.848 * 4
+    $height_min     -11.103 * 5 - .25
+    $height_map     "earth_height.jpg"
+    $normal_map     "earth_norm.jpg"
+    $colour_map     "earth_colour.jpg"
+    $terrain_map    "earth_ter.png"
+    
+    terrain Land:
+        $alt_range  0->100
+        $textures   "land_near.jpg", "land_far.jpg"
+
+    terrain Sea:
+        $alt_range  -100->0
+        $textures   "sea_near.jpg", "sea_far.jpg"

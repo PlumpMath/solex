@@ -1,7 +1,7 @@
 
 // Default planet_gen system.
 
-star("G2V") Sol:
+star Sol(G2V):
     $aphelion       0
     $sm_axis        0
     $inclination    0

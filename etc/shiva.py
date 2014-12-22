@@ -8,6 +8,7 @@ from panda3d.core import Filename
 # Local imports.
 from .settings import _path
 
+
 # ===================
 # Shiva Language defs
 # ===================
@@ -30,6 +31,11 @@ BODY_TEMPLATES = {
         'near_lod': [(.05,15,16), (.1,11,12), (.2,7,8), (.4,5,6), (.8,3,4), (1.4,1,2), (4.8,0,2)],
         'tex_lod':  [(0,100,12), (50,250,6), (175,575,3), (400,1200,1)]
     }
+}
+
+# Star class dict.
+STAR_SPECS_DICT = {
+    'G2V':{ 'radius':696342,    'mass':1.9891*10**30,   'colour':(1,.961,.925,1)},
 }
 
 class Shiva_Compiler:
@@ -60,6 +66,7 @@ class Shiva_Compiler:
                 continue
             if strip_line.endswith("*/"):
                 _ignore = False
+                continue
             if _ignore:
                 continue
             
@@ -131,6 +138,7 @@ class Shiva_Compiler:
                 continue
             if strip_line.endswith("*/"):
                 _ignore = False
+                continue
             if _ignore:
                 continue
             
@@ -145,15 +153,22 @@ class Shiva_Compiler:
                                     
             # New block.
             if tokens[-1].endswith(":"):
-                lead_token = tokens[0].split("(")[0]
-                if lead_token in SYS_QUALS:
-                    new_block = {'name':tokens[-1][:-1].lower(), 'sats':[]}
+                if tokens[0] in SYS_QUALS:
+                    new_block = {'name':tokens[-1][:-1].lower(),
+                                 'body_type':tokens[0],
+                                 'sats':[]}
+                    
+                    # Update the tip's 'sats' with this body and then
+                    # append it to the stack (making it the tip).
                     if block_stack:
                         block_stack[-1]['sats'].append(new_block)
                     block_stack.append(new_block)
                     
-                    if lead_token == "star":
-                        star_cls = tokens[0].split("(\"")[1].replace("\")", "")
+                    # Star.
+                    if tokens[0] == "star":
+                        star_name, cls_str = tokens[1].split("(")
+                        star_cls = cls_str.replace("):", "")
+                        new_block.update(STAR_SPECS_DICT[star_cls])
             
             # Body sys property definitions.
             elif tokens[0].startswith("$"):
@@ -170,7 +185,7 @@ class Shiva_Compiler:
                 block_stack[-1][property_name] = eval(tok_str)   
         
         recipe = block_stack[0]
-        print(recipe)
+
         return recipe
 
 

@@ -250,7 +250,37 @@ uniform vec2 alt_ranges[2];
 uniform vec2 red_ranges[2];
 uniform vec2 green_ranges[2];
 uniform vec2 blue_ranges[2];
-// shared vec3 psuedo_mesh[gl_WorkGroupSize.x+2][gl_WorkGroupSize.y+2];
+
+shared int type_mesh[gl_WorkGroupSize.x+2][gl_WorkGroupSize.y+2];
+
+// Func to find terrain for pixel.
+int get_terrain_type(ivec2 g_coords) {
+    int terrain_type = 10;
+    
+    // Get altitude of current pixel.
+    float map_val = imageLoad(ref_tex, g_coords).r;
+    float alt = (min_height+(map_val*height_range)) - radius;
+
+    // Search for qualifying terrain.
+    bool qualifies;
+    for (int i=0; i<lat_ranges.length(); i++) {
+        qualifies = false;
+        // Altitude.
+        if (alt_ranges[i] != 0) {
+            if (alt >= alt_ranges[i].x && alt < alt_ranges[i].y) {
+                qualifies = true;}
+            else {
+                qualifies = false;
+            }
+        }
+        // If pixel qualifies for this terrain add it to o_color.
+        if (qualifies == true) {
+            terrain_type = i;
+            break;
+        }
+    }
+    return terrain_type;
+}
 
 void main() {
     // Global coords (image).
@@ -258,30 +288,50 @@ void main() {
     int gx = g_coords.x;
     int gy = g_coords.y;
     
-    // Get altitude of current pixel.
-    float map_val = imageLoad(ref_tex, g_coords).r;
-    float alt = (min_height+(map_val*height_range)) - radius;
+    // Local coords (workgroup).
+    ivec2 l_coords = ivec2(gl_LocalInvocationID.xy);
+    int lx = l_coords.x+1;  // Adjust by 1 to account for buffer col to left.
+    int ly = l_coords.y+1;  // Adjust by 1 to account for buffer row above.
     
-    // Test for terrain qualifications.
-    vec4 o_color = vec4(1,1,1,1);
-    int terrain_index = -1;
-    for (int i=0; i<lat_ranges.length(); i++) {
+    // Get nbrs.
+    nbr_struct nbrs = get_nbrs(BM_SPHERE);
     
-        // Altitude.
-        if (alt_ranges[i] != 0) {
-            if (alt >= alt_ranges[i].x && alt < alt_ranges[i].y) {
-                if (i == 0) {o_color=vec4(.5,.5,.5,1);}
-                else if (i == 1) {o_color=vec4(.4,.4,.4,1);}
-                terrain_index = i;
-            } else {
-                terrain_index = -1;
+    // Set terrain type.
+    int terrain_type = get_terrain_type(g_coords);
+    type_mesh[lx][ly] = terrain_type;
+    // Handle workgroup border cases.
+    if (lx == 1) {
+        type_mesh[0][ly] = get_terrain_type(nbrs.w);}
+    else if (lx == gl_WorkGroupSize.x-1) {
+        type_mesh[gl_WorkGroupSize.x+1][ly] = get_terrain_type(nbrs.e);}
+    if (ly == 1) {
+        type_mesh[lx][0] = get_terrain_type(nbrs.n);}
+    else if (ly == gl_WorkGroupSize.y-1) {
+        type_mesh[lx][gl_WorkGroupSize.y+1] = get_terrain_type(nbrs.s);}
+    
+    // 'type_mesh' must have values for whole workgroup before we access it.
+    barrier();
+    
+    // Map main and blend terrain types.
+    vec4 o_color = vec4(float(terrain_type)/64,0,0,1);
+    int blend_count = 0;
+    ivec4 nbr_types = ivec4(type_mesh[lx][ly-1], type_mesh[lx][ly+1],
+                            type_mesh[lx-1][ly], type_mesh[lx+1][ly]);
+    ivec4 used_types = ivec4(terrain_type);
+    for (int i=0; i<4; i++) {
+        int n_type = nbr_types[i];
+        if (n_type == used_types[0] || n_type == used_types[1] ||
+            n_type == used_types[2] || n_type == used_types[3]) {
+            continue;
+        }
+        if (n_type != terrain_type) {
+            o_color[blend_count+1] = float(n_type)/64;
+            used_types[i+1] = n_type;
+            blend_count++;
+            if (blend_count == 3) {
+                break;
             }
         }
-        
-        // Set pixel to this terrain if it qualifies.
-        // if (terrain_index != -1) {
-        //     o_color = vec4(vec3(terrain_index*100),1);
-        // }
     }
     imageStore(mod_tex, g_coords, o_color);
 }

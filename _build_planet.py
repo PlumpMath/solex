@@ -19,7 +19,7 @@ if __name__ == "__main__":
     base.disableMouse()
     
     planet_name = sys.argv[1].lower()
-    shv_path = Filename("{}/{}/{}.shv".format(_path.PLANET_GEN, planet_name, planet_name))
+    shv_path = Filename("{}/{}/{}.shv".format(_path.BODIES, planet_name, planet_name))
     with open(shv_path.toOsLongName()) as shv_file:
         lines = shv_file.readlines()
     shiva_str = "".join(lines)

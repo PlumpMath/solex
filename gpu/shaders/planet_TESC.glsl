@@ -4,17 +4,19 @@
 in vec3 verts[];
 in vec2 map_uvs[];
 in vec2 tex_uvs[];
+in int ter_inds[];
 
 // Out.
 layout(vertices = 3) out;
 out vec3 tc_verts[];
 out vec2 tc_map_uvs[];
 out vec2 tc_tex_uvs[];
-patch out float dist;
+out int tc_ter_inds[];
 
 // Uniform.
 uniform mat4 p3d_ModelViewMatrix;
 uniform vec3 geom_lod[8];
+
 
 // Main.
 void main()
@@ -41,10 +43,11 @@ void main()
     gl_TessLevelOuter[0] = tess_outer;
     gl_TessLevelOuter[1] = tess_outer;
     gl_TessLevelOuter[2] = tess_outer;
-    
+        
     // Map inputs to outputs.
     tc_verts[gl_InvocationID] = verts[gl_InvocationID];
     tc_map_uvs[gl_InvocationID] = map_uvs[gl_InvocationID];
     tc_tex_uvs[gl_InvocationID] = tex_uvs[gl_InvocationID];
-}
+    tc_ter_inds[gl_InvocationID] = ter_inds[gl_InvocationID];
 
+}

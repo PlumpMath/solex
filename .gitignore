@@ -3,6 +3,9 @@
 /test
 **/.leo_shadow
 **/__pycache__
+**/maps
+**/textures
+**/_images
 *.jpg
 *.jpeg
 *.bam

@@ -191,7 +191,7 @@ class System:
                     
             body.NP.setPos(*body_pos)
             
-            if body.type == "planet":
+            if body.body_type == "planet":
                 body.LOD_NP.setShaderInput("light_dir", light_dir_vec)
             
             '''# GUI.
@@ -204,8 +204,8 @@ class System:
         
         def load_body(body_sys_recipe, parent, b_dict={}):
             """Load and init each body and its satellites."""
-            Body = globals()[body_sys_recipe.type.title()]  ## here
-            body_name = body_sys_recipe.__name__.lower()
+            Body = globals()[body_sys_recipe['body_type'].title()]
+            body_name = body_sys_recipe['name'].lower()
             body = Body(body_name, body_sys_recipe)
             b_dict[body_name] = body
             body.NP.reparentTo(self.NP)
@@ -218,29 +218,26 @@ class System:
         
         # Step through recipe and recursively load system.
         b_dict = {}
-        for attr in sys_recipe['sats']:
-            b_dict = load_body(attr, self, b_dict)
-        print("BBBBB")
-        print(b_dict)
+        load_body(sys_recipe, self, b_dict)
+
         return b_dict
 
-
-STAR_TYPE_DICT = {
-    'G2V':{'radius':696342,'mass':1.9891*10**30,'colour':(1,.961,.925,1)}
-}
 
 class Star:
     
     def __init__(self, name, star_sys_recipe):
         self.name = name
-        self.__dict__.update(star_sys_recipe.__dict__)
-        self.__dict__.update(STAR_TYPE_DICT[self.cls])
-        self.model_path = "{}/star.bam".format(_path.MODELS)
+        self.__dict__.update(star_sys_recipe)
+        self.model_path = "{}/sphere_6.bam".format(_path.MODELS)
         
         # Nodepaths.
         self.NP = NodePath(name)
         self.MODEL_NP = loader.loadModel(Filename(self.model_path)).getChildren()[0]
-        self.MODEL = Model(self.MODEL_NP)
+        sphere = Model(self.MODEL_NP)
+        pts = sphere.read("vertex")
+        pts = list(map(lambda pt: pt*self.radius, pts))
+        sphere.modify("vertex", pts)
+        
         self.lod_node = None
         '''mod_star = Modify_Model(self.MODEL_NP)
         pts = mod_star.read("vertex")
@@ -264,7 +261,8 @@ class Planet:
     
     def __init__(self, name, body_sys_recipe):
         self.name = name
-        self.model_path = "{}/{}.bam".format(body_sys_recipe.path, name.lower())
+        self.path = "{}/{}".format(_path.BODIES, name.lower())
+        self.model_path = "{}/{}.bam".format(self.path, name.lower())
         
         # Nodepaths and LODs.
         self.NP = NodePath(name)
@@ -276,7 +274,7 @@ class Planet:
         # Planet specs.
         recipe = literal_eval(self.MODEL_NP.getChild(1).getName())
         self.__dict__.update(recipe)
-        self.__dict__.update(body_sys_recipe.__dict__)
+        self.__dict__.update(body_sys_recipe)
         
         # State.
         self.sys_pos = LVector3d(0,0,0)

@@ -18,13 +18,7 @@ class Shader_Manager:
         shader_types = ["VERT","FRAG","","TESC","TESE"]
         shaders = []
         inputs = []
-        defs = []
         pd = planet.__dict__
-        
-        # Find necessary preproc "def" statements.
-        if "height_map" in pd: defs.append("height_map_on")
-        if "colour_map" in pd: defs.append("colour_map_on")
-        if "terrains" in pd: defs.append("tex_on")
         
         # Load and prepare necessary shaders.
         for shader_type in shader_types:
@@ -33,8 +27,6 @@ class Shader_Manager:
                 file_path = Filename(shader_path).toOsLongName()
                 with open(file_path, "r") as shader_file:
                     lines = list(shader_file.readlines())
-                for def_str in reversed(defs):
-                    lines.insert(2, "#define {}\n".format(def_str))
                 shaders.append("".join(lines))
             else:
                 shaders.append("")
@@ -50,7 +42,9 @@ class Shader_Manager:
         # Terrain specs.
         min_radius = planet.radius - planet.height_min
         elev_range = planet.height_max - planet.height_min
-        terrain_specs = LVector4f(min_radius, elev_range, 0, 0)
+        terrain_count = len(planet.terrains)
+
+        terrain_specs = LVector4f(min_radius, elev_range, terrain_count, 0)
         planet.LOD_NP.setShaderInput("terrain_specs", terrain_specs)
         planet.LOD_NP.setShaderInput("ambient_val", _env.AMBIENT_FACTOR)
         

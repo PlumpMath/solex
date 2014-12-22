@@ -25,21 +25,17 @@
 expanded="cslos77.20141212010436.4,"><vh>@shadow shiva.py</vh></v>
 </v>
 <v t="cslos77.20141120192122.8" a="E"><vh>@path planet_gen</vh>
-<v t="cslos77.20141120192122.28" a="E"
-expanded="cslos77.20141120192122.29,"><vh>@shadow planet_gen.py</vh></v>
-<v t="cslos77.20141120192122.52"><vh>@shadow model.py</vh></v>
-<v t="cslos77.20141212010436.10" a="E"><vh>@path saved</vh>
-<v t="cslos77.20141212010436.13"><vh>@shadow templates.py</vh></v>
-<v t="cslos77.20141210210514.5"><vh>@shadow earth/earth.shv</vh></v>
-</v>
+<v t="cslos77.20141120192122.28"><vh>@shadow planet_gen.py</vh></v>
+<v t="cslos77.20141120192122.52" a="E"
+expanded="cslos77.20141120192122.73,"><vh>@shadow model.py</vh></v>
 </v>
 <v t="cslos77.20141120192122.10" a="E"><vh>@path solex</vh>
 <v t="cslos77.20141120192122.11" a="E"
-expanded="cslos77.20141120192122.18,cslos77.20141120192122.35,"><vh>@shadow environment.py</vh></v>
+expanded="cslos77.20141120192122.35,"><vh>@shadow environment.py</vh></v>
 <v t="cslos77.20141120192122.13"
 expanded="cslos77.20141120192122.14,cslos77.20141120192122.15,"><vh>@shadow cameras.py</vh></v>
-<v t="cslos77.20141122021629.8"><vh>@shadow shader.py</vh></v>
-<v t="cslos77.20141213043440.2"><vh>@shadow texture.py</vh></v>
+<v t="cslos77.20141122021629.8" a="E"><vh>@shadow shader.py</vh></v>
+<v t="cslos77.20141213043440.2" a="E"><vh>@shadow texture.py</vh></v>
 </v>
 <v t="cslos77.20141120192122.20"><vh>@path gui</vh>
 <v t="cslos77.20141120192122.22" a="E"
@@ -50,27 +46,33 @@ expanded="cslos77.20141120192122.23,"><vh>@shadow ueh.py</vh></v>
 <v t="cslos77.20141120192122.39"><vh>@shadow _default.py</vh></v>
 <v t="cslos77.20141213081755.5"><vh>@shadow _default.shv</vh></v>
 </v>
+<v t="cslos77.20141214080158.2" a="E"><vh>@path bodies</vh>
+<v t="cslos77.20141210210514.5"><vh>@shadow earth/earth.shv</vh></v>
 </v>
-<v t="cslos77.20141129025015.19"><vh>@path gpu</vh>
+</v>
+<v t="cslos77.20141129025015.19" a="E"><vh>@path gpu</vh>
 <v t="cslos77.20141129025015.26"><vh>scripts</vh>
 <v t="cslos77.20141129025015.27"><vh>@shadow _swizzle_demo.py</vh></v>
 <v t="cslos77.20141129025015.29"><vh>@shadow _gen_normal_map.py</vh></v>
 <v t="cslos77.20141125093326.10"><vh>__generate_Normal_Map (cpu)</vh></v>
 </v>
 <v t="cslos77.20141129025015.21" a="E"><vh>@shadow panda3d_gpu.py</vh></v>
-<v t="cslos77.20141125093326.15"><vh>@shadow gpu_image_lib.glsl</vh></v>
+<v t="cslos77.20141125093326.15" a="E"><vh>@shadow gpu_image_lib.glsl</vh></v>
 <v t="cslos77.20141122021629.9" a="E"><vh>@path shaders</vh>
 <v t="cslos77.20141122021629.10"><vh>@shadow planet_VERT.glsl</vh></v>
 <v t="cslos77.20141125093326.4"><vh>@shadow planet_TESC.glsl</vh></v>
 <v t="cslos77.20141125093326.5"><vh>@shadow planet_TESE.glsl</vh></v>
-<v t="cslos77.20141122021629.11"><vh>@shadow planet_FRAG.glsl</vh></v>
+<v t="cslos77.20141222013217.2"><vh>@shadow planet_FRAG.glsl</vh></v>
 </v>
 </v>
-<v t="cslos77.20141122021629.14"><vh>@path test</vh>
+<v t="cslos77.20141122021629.14" a="E"><vh>@path test</vh>
 <v t="cslos77.20141122021629.15"><vh>@shadow main.py</vh></v>
 <v t="cslos77.20141122021629.16"><vh>@shadow ShaderCombiner.py</vh></v>
 <v t="cslos77.20141122021629.17"><vh>@shadow shader.glsl</vh></v>
 <v t="cslos77.20141129025015.9"><vh>@shadow compute_test.py</vh></v>
+<v t="cslos77.20141219120401.5"><vh>@shadow planet_GEOM.glsl</vh></v>
+<v t="cslos77.20141214080158.5"><vh>shiva demo</vh></v>
+<v t="cslos77.20141214080158.6"><vh>shiva ref</vh></v>
 </v>
 </v>
 </vnodes>
@@ -194,6 +196,71 @@ print(8-floor(sqrt(num))+1)'''
 </t>
 <t tx="cslos77.20141129025015.19"></t>
 <t tx="cslos77.20141129025015.26"></t>
-<t tx="cslos77.20141212010436.10"></t>
+<t tx="cslos77.20141214080158.2"></t>
+<t tx="cslos77.20141214080158.5">@language shiva
+
+// Object def.
+composite active Thruster:
+    $radius = 1.2
+    
+    component XXA_Fuel_Rod_v23 as $fuel_rod
+    
+// Demo animate statement ("animate" qualifier.)
+animate:
+    if $TARGET:
+        if velocity($TARGET) &gt; 100:
+            push("adj_thrust", direction($TARGET) * extract($E, 100))
+    if "die" in $CMDS:
+        die()
+            
+// Demo when statement ("active" qualifier.)
+when distance($TARGET) &lt; 120000:
+    push("nav_comp_prepare_approach")
+    push("gui_change_mode_approach")
+    reset when distance($TARGET) &gt; 140000
+
+// Demo commmand ("responsive" qualifier.)
+command thruster_fire(e_val):
+    e = extract($E, e_val)
+    inject($fuel_rod, e)
+
+
+</t>
+<t tx="cslos77.20141214080158.6">@language shiva
+
+// Data types.
+x = 5                // integer
+y = 5.2              // float
+z_str = "hello"      // str
+q_list = [4,2,5]    // list
+
+// Shiva lib.
+cycle(&lt;list&gt;, rate)
+blend(img_A, img_B, mix)
+f = random(1.0)
+v = unit(&lt;vec&gt;)
+
+
+// Shakti lib.
+e = extract($E, 45)
+inject(&lt;obj&gt;, $E(200))
+
+f = convert(e, direction($TARGET))
+accelerate(f)
+rotate(f)
+
+push("some_command", [45, arg])
+arg_list = pull("some_command")
+arg_list = touch("some_command")
+
+// Vishnu lib.
+dst = distance($Target)
+dir = direction($TARGET)
+vel = velocity($TARGET)
+rot = rotation($TARGET)
+mom = momentum($TARGET)
+tor = torque($TARGET)
+pos = position($TARGET)
+</t>
 </tnodes>
 </leo_file>

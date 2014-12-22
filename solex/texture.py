@@ -34,16 +34,30 @@ class Texture_Manager:
         norm_tex = Texture()
         norm_tex.load(norm_img)
         planet.LOD_NP.setShaderInput("normal_map", norm_tex)
-        print(planet.terrains)
+        
+        # Terrain map texture.
+        ter_img = PNMImage()
+        ter_img.read(Filename("{}/maps/{}".format(planet.path, planet.terrain_map)))
+        ter_tex = Texture()
+        ter_tex.load(ter_img)
+        planet.LOD_NP.setShaderInput("terrain_map", ter_tex)
+        
         # Terrain textures.
-        for terrain in planet.terrains:
-            tex_array = Texture()
-            tex_array.setup2dTextureArray(4)
-            for i, tex_name in enumerate(terrain['textures']):
-                tex_img = PNMImage()
-                tex_img.read(Filename("{}/textures/{}".format(planet.path, tex_name)))
-                tex_array.load(tex_img, i, 0)
-            planet.LOD_NP.setShaderInput("tex_array", tex_array)  ## temp for mono terrain
+        tex_count = len(planet.terrains)
+        near_tex_array = Texture()
+        far_tex_array = Texture()
+        near_tex_array.setup2dTextureArray(tex_count)
+        far_tex_array.setup2dTextureArray(tex_count)
+        for i, terrain in enumerate(planet.terrains):
+            near_tex_img, far_tex_img = PNMImage(), PNMImage()
+            near_tex_name, far_tex_name = terrain['textures']
+            near_tex_img.read(Filename("{}/textures/{}".format(planet.path, near_tex_name)))
+            far_tex_img.read(Filename("{}/textures/{}".format(planet.path, far_tex_name)))
+            near_tex_array.load(near_tex_img, i, 0)
+            far_tex_array.load(far_tex_img, i, 0)
+        
+        planet.LOD_NP.setShaderInput("near_tex", near_tex_array)
+        planet.LOD_NP.setShaderInput("far_tex", far_tex_array)
     
     def __new__(self):
         return None

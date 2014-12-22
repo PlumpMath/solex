@@ -263,17 +263,15 @@ class Planet_Builder:
     def build(self, planet_np, recipe=None):
         self.__build_Planet(planet_np, recipe)
     def save(self, planet_np, name):
-        model_path = "{}/{}/{}.bam".format(_path.PLANET_GEN, name, name)
-        planet_np.writeBamFile(model_path)
-    def export(self, planet_np, name):
-        model_path = "{}/{}.bam".format(_path.BODIES, name)
+        model_path = "{}/{}/{}.bam".format(_path.BODIES, name, name)
         planet_np.writeBamFile(model_path)
 
 
 
     def __init_Planet(self, shiva_str):
         # Interpret shiv str into recipe.
-        recipe = SC.compile(shiva_str)
+        recipe = SC.compile_body_recipe(shiva_str)
+        recipe['path'] = "{}/{}".format(_path.BODIES, recipe['name'].lower())
         
         # Planet and LOD nodes.
         planet_np = NodePath("{}_model".format(recipe['name']))
@@ -281,8 +279,7 @@ class Planet_Builder:
         lod_np = NodePath(lod_node)
         lod_np.reparentTo(planet_np)
         # Recipe NP.
-        recipe_np = NodePath("{}")
-        recipe_np.setName(repr(recipe))
+        recipe_np = NodePath(repr(recipe))
         recipe_np.reparentTo(planet_np)
         
         # Build models.
@@ -316,24 +313,10 @@ class Planet_Builder:
         else:
             recipe = planet_recipe
         
-        '''# Height map.
-        if "height_map" in recipe:
-            self.__set_Map_Texture(planet_np, recipe, recipe['height_map'], 0)
-        
-        # Generate normal map if requested.
-        if "normal_map" in recipe:
-            if recipe['normal_map'] == True:
-                recipe = self.__build_Normal_Map(recipe)
-            self.__set_Map_Texture(planet_np, recipe, recipe['normal_map'], 1)
-        
-        # Colour map.
-        if "colour_map" in recipe:
-            self.__set_Map_Texture(planet_np, recipe, recipe['colour_map'], 2)'''
-        
         # Terrains.
         if "terrains" in recipe:
-            with TimeIt("terrains"): pass
-                ## self.__build_Terrain_Map(planet_np, recipe)
+            with TimeIt("terrains"):
+                self.__build_Terrain_Map(planet_np, recipe)
         
     def __build_Normal_Map(self, recipe):
         # Load ref image.
@@ -379,8 +362,8 @@ class Planet_Builder:
                     ranges_dict[attr+"s"][i] = LVector2f(*val)
 
         # Create terrain map with GPU.
-        min_height = recipe['radius']+recipe['min_elevation']
-        height_range = recipe['max_elevation']-recipe['min_elevation']
+        min_height = recipe['radius']+recipe['height_min']
+        height_range = recipe['height_max']-recipe['height_min']
         with GPU_Image(height_map, print_times=True) as gpu:
             terrain_img = gpu.generate_terrain_map(radius=recipe['radius'],
                                                    min_height=min_height,
@@ -390,70 +373,6 @@ class Planet_Builder:
                                                    **ranges_dict)
         
             terrain_img.write(Filename("{}/maps/earth_ter.png".format(recipe['path'])))
-
-    def __assign_Terrains(self, model, recipe, final_rec=False):
-        tex_dict = {}
-        _set_col, _set_tex = False, False
-        _sea_on = "sea_colour" in recipe
-        enum_terrains = list(enumerate(recipe['terrains']))
-        
-        i = 0
-        pts = list(map(lambda pt: pt*radius, pts))
-        height_img = PNMImage()
-            
-        pts = model.read("vertex")
-        cols = model.read("color")
-        infos = model.read("info")
-        
-        for pt, col, info in zip(pts, cols, infos):
-            terrain = None
-            r, g, b, a = col
-            for ti, ter in enum_terrains:
-                # Default.
-                if "default" in ter:
-                    if ter['default']:
-                        terrain = ter
-                
-                # Altitude.
-                if "alt_range" in ter:
-                    alt = pt.length()-recipe['radius']
-                    low, high = ter['alt_range']
-                    if alt >= low and alt <= high:
-                        terrain = ter
-                    else: continue
-                
-                # Colours.
-                if "red_range" in ter:
-                    low, high = ter['red_range']
-                    if r >= low and r <= high:
-                        terrain = ter
-                    else: continue
-                if "green_range" in ter:
-                    low, high = ter['green_range']
-                    if g >= low and g <= high:
-                        terrain = ter
-                    else: continue
-                if "blue_range" in ter:
-                    low, high = ter['blue_range']
-                    if b >= low and b <= high:
-                        terrain = ter
-                    else: continue
-                
-                # Set terrain.
-                if terrain:
-                    infos[i][3] = ti
-                    if "colour" in terrain:
-                        cols[i] = terrain['colour']
-                        _set_col = True
-                    if "texture" in terrain:
-                        tex_dict[i] = terrain['name']
-            i += 1
-            
-        pts = None
-        model.modify("color", cols)
-        cols = None
-        model.modify("info", infos)
-        return tex_dict
 
 
 class Model:
