@@ -34,7 +34,7 @@ void main()
     vec3 pA = gl_TessCoord.s * tc_verts[0];
     vec3 pB = gl_TessCoord.t * tc_verts[1];
     vec3 pC = gl_TessCoord.p * tc_verts[2];
-    vec3 vert = (pA+pB+pC);
+    precise vec3 vert = (pA+pB+pC);
     
     // Get vert map UV for height and colour.
     vec2 muv_A = gl_TessCoord.s * tc_map_uvs[0];

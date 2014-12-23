@@ -81,13 +81,13 @@ class Surface_Camera(_Camera_):
                'rotate_pitch':"_shift-_mouse1"}
     
     _y_val = 0
-    _x_val = 36
-    _z_val = 36
+    _x_val = 16
+    _z_val = 16
     _h_val = 0
     _p_val = 0
     
     _y_zone = 20  # Width of move y-axis only zone.
-    _rot_factor = .002
+    _rot_factor = .001
     _prev_pos = LVector3f(0,0,0)
     
     def switch_to(self):
