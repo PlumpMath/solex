@@ -5,6 +5,7 @@ in vec3 verts[];
 in vec2 map_uvs[];
 in vec2 tex_uvs[];
 in int ter_inds[];
+in float tess_vals[];
 in float heights[];
 
 // Out.
@@ -31,10 +32,10 @@ void main()
     
     // Establish height variation between verts for tess max values. Less
     // height variation means less tesselation is required, even at close
-    // distances (i.e. a flat piece of land requires no tesselation at all.)
-    float AB_var = abs(heights[0]-heights[1]);
-    float BC_var = abs(heights[1]-heights[2]);
-    float CA_var = abs(heights[2]-heights[0]);
+    // distances (i.e. a flat piece of land requires no tesselation at all.
+    float AB_var = (tess_vals[0]+tess_vals[1]) / 2;
+    float BC_var = (tess_vals[1]+tess_vals[2]) / 2;
+    float CA_var = (tess_vals[2]+tess_vals[0]) / 2;
     int ab_max = 16;
     int bc_max = 16;
     int ca_max = 16;
@@ -72,20 +73,6 @@ void main()
         }
     }
     
-    /* Alternate way to establish geom lod index that avoided looping
-    but was no faster in the end. The amount of verts output by the
-    TESC shader seems to be the decisive factor in the total shader
-    GPU cost, not the amount of work the TESC shader itself does.
-    
-    int index = max(int(floor(log2(dist)))-7, 0);
-    int ab_index = max(int(floor(log2((dist_0+dist_1)/2)))-7, 0);
-    int bc_index = max(int(floor(log2((dist_1+dist_2)/2)))-7, 0);
-    int ca_index = max(int(floor(log2((dist_2+dist_0)/2)))-7, 0);
-    int tess_inner = geom_lod[index].y;
-    int tess_AB = geom_lod[ab_index].z;
-    int tess_BC = geom_lod[bc_index].z;
-    int tess_CA = geom_lod[ca_index].z;*/
-    
     // Set tess levels.
     gl_TessLevelInner[0] = tess_inner;
     gl_TessLevelOuter[0] = tess_BC;
@@ -99,3 +86,4 @@ void main()
     tc_ter_inds[gl_InvocationID] = ter_inds[gl_InvocationID];
 
 }
+

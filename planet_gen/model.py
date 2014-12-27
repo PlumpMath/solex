@@ -316,7 +316,7 @@ class Planet_Builder:
         # Terrains.
         if "terrains" in recipe:
             with TimeIt("terrains"):
-                self.__build_Terrain_Map(planet_np, recipe)
+                self.__build_Terrain_Map(recipe)
         
     def __build_Normal_Map(self, recipe):
         # Load ref image.
@@ -326,14 +326,13 @@ class Planet_Builder:
         
         # Create normal map from height map with GPU.
         with GPU_Image(ref_img, print_times=True) as gpu:
-            depth = recipe['max_elevation'] - recipe['min_elevation']
-            norm_img = gpu.generate_normal_map(depth=depth)
+            height_range = LVector2f(recipe['height_min'], recipe['height_max'])
+            norm_img = gpu.generate_normal_map(height_range=height_range)
             norm_img.write(Filename("{}/maps/earth_norm.jpg".format(recipe['path'])))
         
-        recipe['normal_map'] = "earth_norm.jpg"
         return recipe
         
-    def __build_Terrain_Map(self, planet_np, recipe):
+    def __build_Terrain_Map(self, recipe):
         # Height map.
         height_map = PNMImage()
         height_map_path = "{}/maps/{}".format(recipe['path'], recipe['height_map'])
@@ -362,17 +361,13 @@ class Planet_Builder:
                     ranges_dict[attr+"s"][i] = LVector2f(*val)
 
         # Create terrain map with GPU.
-        min_height = recipe['radius']+recipe['height_min']
-        height_range = recipe['height_max']-recipe['height_min']
+        height_range = LVector2f(recipe['height_min'],recipe['height_max'])
         with GPU_Image(height_map, print_times=True) as gpu:
-            terrain_img = gpu.generate_terrain_map(radius=recipe['radius'],
-                                                   min_height=min_height,
-                                                   height_range=height_range,
+            terrain_img = gpu.generate_terrain_map(height_range=height_range,
                                                    col_map=col_map,
-                                                   norm_map=norm_map,
                                                    **ranges_dict)
-        
-            terrain_img.write(Filename("{}/maps/earth_ter.png".format(recipe['path'])))
+            file_path = "{}/maps/{}_ter.png".format(recipe['path'], recipe['name'].lower())
+            terrain_img.write(Filename(file_path))
 
 
 class Model:

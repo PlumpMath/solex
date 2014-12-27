@@ -23,14 +23,15 @@
 <v t="cslos77.20141120192122.7"><vh>@shadow util.py</vh></v>
 <v t="cslos77.20141212010436.3" a="E"><vh>@shadow shiva.py</vh></v>
 </v>
-<v t="cslos77.20141120192122.8"><vh>@path planet_gen</vh>
+<v t="cslos77.20141120192122.8" a="E"><vh>@path planet_gen</vh>
 <v t="cslos77.20141120192122.28"><vh>@shadow planet_gen.py</vh></v>
-<v t="cslos77.20141120192122.52"><vh>@shadow model.py</vh></v>
+<v t="cslos77.20141120192122.52" a="E"
+expanded="cslos77.20141120192122.73,"><vh>@shadow model.py</vh></v>
 </v>
 <v t="cslos77.20141120192122.10" a="E"><vh>@path solex</vh>
 <v t="cslos77.20141120192122.11" a="E"><vh>@shadow environment.py</vh></v>
-<v t="cslos77.20141120192122.13" a="E"
-expanded="cslos77.20141120192122.14,cslos77.20141120192122.15,cslos77.20141122021629.3,"><vh>@shadow cameras.py</vh></v>
+<v t="cslos77.20141120192122.13"
+expanded="cslos77.20141120192122.15,cslos77.20141122021629.3,"><vh>@shadow cameras.py</vh></v>
 <v t="cslos77.20141122021629.8" a="E"><vh>@shadow shader.py</vh></v>
 <v t="cslos77.20141213043440.2" a="E"><vh>@shadow texture.py</vh></v>
 </v>
@@ -53,7 +54,7 @@ expanded="cslos77.20141120192122.23,"><vh>@shadow ueh.py</vh></v>
 <v t="cslos77.20141125093326.10"><vh>__generate_Normal_Map (cpu)</vh></v>
 </v>
 <v t="cslos77.20141129025015.21"><vh>@shadow panda3d_gpu.py</vh></v>
-<v t="cslos77.20141125093326.15"><vh>@shadow gpu_image_lib.glsl</vh></v>
+<v t="cslos77.20141125093326.15" a="E"><vh>@shadow gpu_image_lib.glsl</vh></v>
 <v t="cslos77.20141122021629.9" a="E"><vh>@path shaders</vh>
 <v t="cslos77.20141122021629.10"><vh>@shadow planet_VERT.glsl</vh></v>
 <v t="cslos77.20141125093326.4"><vh>@shadow planet_TESC.glsl</vh></v>
