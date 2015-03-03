@@ -6,7 +6,7 @@ in vec2 mapcoord;
 in vec2 texcoord;
 
 // Uniform.
-uniform float radius;
+// uniform float radius;
 uniform sampler2D height_map;
 uniform sampler2D terrain_map;
 uniform vec4 terrain_specs;

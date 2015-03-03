@@ -188,8 +188,11 @@ class System:
                 if body.lod_node:
                     body.lod_node.setCenter(LPoint3f(0,0,0))
                 body._is_far = False
-                    
+                
             body.NP.setPos(*body_pos)
+            if dist_from_cam < far_radius:
+                cull_dist = dist_from_cam**2 - body.radius**2
+                body.LOD_NP.setShaderInput("cull_dist", cull_dist)
             
             if body.body_type == "planet":
                 body.LOD_NP.setShaderInput("light_dir", light_dir_vec)
@@ -290,7 +293,6 @@ class Planet:
         TM.set_planet_textures(self)
         
         # Render wireframe for crude models.
-        ## if "max_elevation" not in self.__dict__:
         ## self.LOD_NP.setAttrib(RenderModeAttrib.make(2))
 
 

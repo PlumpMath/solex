@@ -35,9 +35,13 @@ class Shader_Manager:
         shader = Shader.make(Shader.SL_GLSL, *shaders)
         planet.LOD_NP.setShader(shader)
         
-        # Set shader inputs.
+        # Env constants.
         planet.LOD_NP.setShaderInput("radius", float(planet.radius))
+        planet.LOD_NP.setShaderInput("ambient_val", _env.AMBIENT_FACTOR)
+        
+        # Env vars.
         planet.LOD_NP.setShaderInput("light_dir", LVector3f(1,0,0))
+        planet.LOD_NP.setShaderInput("cull_dist", 0)
         
         # Terrain specs.
         min_radius = planet.radius - planet.height_min
@@ -46,7 +50,6 @@ class Shader_Manager:
 
         terrain_specs = LVector4f(min_radius, elev_range, terrain_count, 0)
         planet.LOD_NP.setShaderInput("terrain_specs", terrain_specs)
-        planet.LOD_NP.setShaderInput("ambient_val", _env.AMBIENT_FACTOR)
         
         # Geom tesselation specs.
         geom_lod_list = [LVector3i(x*0,0,0) for x in range(8)]  ## lod ranges need to be un const.
