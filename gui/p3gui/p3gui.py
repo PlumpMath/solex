@@ -1308,7 +1308,9 @@ class Text(_Widget_):
     def set_text(self, text, resize=False):
         if text == self.text: return
         self.text = text
-        self.rebuild()
+        self.text_node.setText(text)
+        self.size = self.get_size()
+        self.render()
     def get_size(self, isnan=isnan):
         w = self.text_node.getWidth()
         h = self.text_node.getHeight()

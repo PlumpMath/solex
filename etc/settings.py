@@ -8,6 +8,10 @@ from os import path
 # System
 # ------
 
+class _sys:
+    SCREEN_WIDTH = 1920
+    SCREEN_HEIGHT = 1080
+
 # File system.
 class _path:
     solex_dir = path.dirname(path.dirname(path.abspath(__file__)))
@@ -39,14 +43,10 @@ class _env:
 # Simulator.
 class _sim:
     MAX_LOCAL_BODIES = 1000
-    LOCAL_THROTTLE = 2
+    HZ = 2
 
 # Camera.
 class _cam:
     FAR = 1000000
-    
-# Command maps.
-class _maps:
-    client = {'exit':"escape"}
 
 

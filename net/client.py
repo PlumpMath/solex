@@ -4,45 +4,58 @@
 
 # System.
 from sys import exit
+from glob import glob
+from os import path as os_path
 
 # Panda3d.
 from direct.showbase.ShowBase import ShowBase
-from panda3d.core import ClockObject
+from panda3d.core import ClockObject, Filename
 
 # Local.
-from etc.settings import _path, _maps, _sim
+from etc.settings import _path, _sim
+from etc.shiva import Shiva_Compiler as SC
 from gui.ueh import Default_UEH
-from solex.lobby import Lobby
+from solex.views import *
+from solex.bodies import *
 from solex.simulator import Simulator
 
 
 class Client(ShowBase):
     
     # Public.
-    def launch_system_local(self, sys_recipe):
+    def init_system(self, sys_name):
+        sys_recipe = self.sys_recipes[sys_name]
+        self.SYS = self.__init_Sys(sys_recipe)
         self.SIM.init_system(sys_recipe)
-        self.SIM.start()
+        self.PRE_VIEW.on_sys_init()
+        ## self.SIM.start()
     def exit(self):
         self.SIM.stop()
         exit()
+    def switch_display(self, display):
+        display.on_switch()
+        self.__switch_Display(display)
+    def refresh_sys_recipes(self):
+        self.sys_recipes = self.__refresh_Sys_Recipes()
     
     # Setup.
     def __init__(self):
         ShowBase.__init__(self)
         self.Clock = ClockObject.getGlobalClock()
-        self.cmd_map = _maps.client
         self._alive = True
         self._connected = False
         self._prev_t = 0
+        self._display_region = self.cam.getNode(0).getDisplayRegion(0)
     
         # Init main menu and environment.
         self.LOBBY = Lobby(self)  # <-
         '''self.ENV = Environment(self)  # <-
-        self.ENV.NP.hide()
-        self.PRE_ENV = Preview_Env(self)  # <-
-        self.PRE_ENV.NP.hide()'''
+        self.ENV.NP.hide()'''
+        self.PRE_VIEW = Pre_View(self)  # <-
+        self.PRE_VIEW.NP.hide()
         self.DISPLAY = self.LOBBY
         self.SIM = Simulator(_sim.MAX_LOCAL_BODIES)
+        self.sys_recipes = self.__refresh_Sys_Recipes()
         
         # Init Player and main objects.
         ## self.PLAYER = Player()  # <-
@@ -70,7 +83,7 @@ class Client(ShowBase):
         
         # User events.
         ue = self.UEH._get_events_()  # <-
-        self._handle_user_events_(ue)  # <-
+        self._handle_user_events_(ue, dt)  # <-
         
         # Main loops.
         self.DISPLAY._main_loop_(ue, dt)  # <-
@@ -79,11 +92,45 @@ class Client(ShowBase):
         if self._alive: return task.cont
         else: self.exit()
 
-    def _handle_user_events_(self, ue):
-        cmds = ue.get_cmds(self)
-        if "exit" in cmds:
-            print("exit")
-            self._alive = False
+    def _handle_user_events_(self, ue, dt):
+        pass
+    def __refresh_Sys_Recipes(self):
+        sys_dir_path = Filename("{}/*.shv".format(_path.SYSTEMS))
+        sys_files = glob(sys_dir_path.toOsLongName())
+        sys_recipes = {}
+        for sys_file in sys_files:
+            base_name = os_path.basename(sys_file)
+            sys_name = os_path.splitext(base_name)[0]
+            sys_recipes[sys_name] = SC.compile_sys_recipe(sys_file)
+        return sys_recipes
+
+    def __init_Sys(self, sys_recipe):
+        
+        class Sys:
+            name = sys_recipe['name']
+            BODIES = []
+            B_DICT = {}
+        sys = Sys()
+        
+        def add_body(body_recipe):
+            body = Body(body_recipe)
+            sys.BODIES.append(body)
+            sys.B_DICT[body_recipe['name']] = body
+            for sat in body_recipe['sats']:
+                add_body(sat)
+            
+        add_body(sys_recipe)
+        return sys
+
+    def __switch_Display(self, display):
+        self.DISPLAY.NP.hide()
+        self.DISPLAY.GUI.NP.hide()
+        self.DISPLAY.CAMERA.cam_node.setActive(False)
+        display.NP.show()
+        display.GUI.NP.show()
+        display.CAMERA.cam_node.setActive(True)
+        self._display_region.setCamera(display.CAMERA.NP)
+        self.DISPLAY = display
 
 
 

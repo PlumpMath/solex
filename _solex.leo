@@ -28,17 +28,17 @@ expanded="cslos77.20141212010436.4,"><vh>@shadow shiva.py</vh></v>
 <v t="cslos77.20150302085211.6"><vh>@shadow net.py</vh></v>
 <v t="cslos77.20150302085211.4" a="E"
 expanded="cslos77.20150302085211.7,"><vh>@shadow client.py</vh></v>
-<v t="cslos77.20150302085211.5" a="E"><vh>@shadow server.py</vh></v>
+<v t="cslos77.20150302085211.5"><vh>@shadow server.py</vh></v>
 </v>
 <v t="cslos77.20141120192122.10" a="E"><vh>@path solex</vh>
-<v t="cslos77.20150302085211.68" a="E"
-expanded="cslos77.20150302085211.70,"><vh>@shadow lobby.py</vh></v>
+<v t="cslos77.20150302085211.122" a="E"
+expanded="cslos77.20150302085211.70,cslos77.20150302085211.124,"><vh>@shadow views.py</vh></v>
+<v t="cslos77.20150302085211.123" a="E"><vh>@shadow bodies.py</vh></v>
 <v t="cslos77.20141120192122.11"><vh>@shadow environment.py</vh></v>
-<v t="cslos77.20141120192122.13"
-expanded="cslos77.20141120192122.15,cslos77.20141122021629.3,"><vh>@shadow cameras.py</vh></v>
+<v t="cslos77.20141120192122.13" a="E"><vh>@shadow cameras.py</vh></v>
 <v t="cslos77.20141122021629.8"><vh>@shadow shader.py</vh></v>
 <v t="cslos77.20141213043440.2"><vh>@shadow texture.py</vh></v>
-<v t="cslos77.20150302085211.104" a="E"
+<v t="cslos77.20150302085211.104"
 expanded="cslos77.20150302085211.105,"><vh>@shadow simulator.py</vh></v>
 </v>
 <v t="cslos77.20141120192122.8"><vh>@path planet_gen</vh>
@@ -64,8 +64,8 @@ expanded="cslos77.20141120192122.29,"><vh>@shadow planet_gen.py</vh></v>
 <v t="cslos77.20141120192122.20" a="E"><vh>@path gui</vh>
 <v t="cslos77.20141120192122.22"><vh>@shadow ueh.py</vh></v>
 <v t="cslos77.20150302085211.8" a="E"
-expanded="cslos77.20150302085211.79,cslos77.20150302085211.89,"><vh>@shadow gui.py</vh></v>
-<v t="cslos77.20150302085211.9"><vh>@path p3gui</vh>
+expanded="cslos77.20150302085211.137,"><vh>@shadow gui.py</vh></v>
+<v t="cslos77.20150302085211.9" a="E"><vh>@path p3gui</vh>
 <v t="cslos77.20150302085211.12" a="E"
 expanded="cslos77.20150302085211.33,cslos77.20150302085211.35,cslos77.20150302085211.46,cslos77.20150302085211.47,cslos77.20150302085211.62,"><vh>@shadow p3gui.py</vh></v>
 </v>
@@ -77,6 +77,8 @@ expanded="cslos77.20150302085211.33,cslos77.20150302085211.35,cslos77.2015030208
 </v>
 <v t="cslos77.20141214080158.2" a="E"><vh>@path bodies</vh>
 <v t="cslos77.20141210210514.5"><vh>@shadow earth/earth.shv</vh></v>
+<v t="cslos77.20150302085211.117"><vh>@shadow mars/mars.shv</vh></v>
+<v t="cslos77.20150302085211.118"><vh>@shadow moon/moon.shv</vh></v>
 </v>
 </v>
 <v t="cslos77.20141122021629.14"><vh>@path test</vh>

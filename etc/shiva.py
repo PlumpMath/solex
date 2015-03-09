@@ -22,11 +22,23 @@ BODY_QUALS = ("hellish", "hot", "warm", "cool", "cold",
 TERRAIN_QUALS = ("terrain", "sea")
 
 # System Qualifiers.
-SYS_QUALS = ("star", "planet", "moon", "planetoid", "asteroid", "coment")
+SYS_QUALS = ("star", "planet", "moon", "planetoid", "asteroid", "comet")
 
 # Body Templates.
 BODY_TEMPLATES = {
     "terran":{
+        'far_lod':  [(6,400000), (7,160000), (8,0)],
+        'near_lod': [(.04,15,16), (.08,11,12), (.16,7,8), (.32,5,6), (.64,3,4), (1.28,1,2), (2.56,0,2)],
+        'tex_lod':  [(0,100,12), (50,250,6), (175,575,3), (400,1200,1)],
+        'tess_lod': [(.25,1), (.5,2), (1,4), (2,8)]
+    },
+    "sub_terran":{
+        'far_lod':  [(6,400000), (7,160000), (8,0)],
+        'near_lod': [(.04,15,16), (.08,11,12), (.16,7,8), (.32,5,6), (.64,3,4), (1.28,1,2), (2.56,0,2)],
+        'tex_lod':  [(0,100,12), (50,250,6), (175,575,3), (400,1200,1)],
+        'tess_lod': [(.25,1), (.5,2), (1,4), (2,8)]
+    },
+    "mercurian":{
         'far_lod':  [(6,400000), (7,160000), (8,0)],
         'near_lod': [(.04,15,16), (.08,11,12), (.16,7,8), (.32,5,6), (.64,3,4), (1.28,1,2), (2.56,0,2)],
         'tex_lod':  [(0,100,12), (50,250,6), (175,575,3), (400,1200,1)],
@@ -50,7 +62,11 @@ class Shiva_Compiler:
     
 
     def __compile_Body_Recipe(shiva_str):
-        lines = shiva_str.split("\n")
+        if shiva_str.endswith(".shv"):
+            with open(Filename(shiva_str).toOsLongName()) as shiva_file:
+                lines = list(shiva_file.readlines())
+        else:
+            lines = shiva_str.split("\n")
         recipe = {'terrains':[]}
         current_block = recipe
         _ignore = False
@@ -172,11 +188,14 @@ class Shiva_Compiler:
                         star_cls = cls_str.replace("):", "")
                         new_block.update(STAR_SPECS_DICT[star_cls])
                         new_block['name'] = star_name
-                        _totals['_stars'] += 1
-                    elif tokens[0] == "planet":
-                        _totals['_planets'] += 1
-                    elif tokens[0] == "moon":
-                        _totals['_moon'] +=1
+                        new_block['type'] = "star"
+                    elif tokens[0] == "planet" or tokens[0] == "moon":
+                        body_name = tokens[1].split("(")[0].replace(":", "")
+                        body_path = "{}/{}/{}.shv".format(_path.BODIES, body_name, body_name)
+                        body_recipe = Shiva_Compiler.compile_body_recipe(body_path)
+                        new_block.update(body_recipe)
+                        new_block['type'] = "planet"
+                    _totals["_"+tokens[0]+"s"] +=1
                     _totals['_total'] += 1
             
             # Body sys property definitions.

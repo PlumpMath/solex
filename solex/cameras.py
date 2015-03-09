@@ -7,17 +7,19 @@ from panda3d.core import NodePath, Camera
 from panda3d.core import LVector3f, LVector3d, LPoint3f
 
 # Local imports.
-from etc.settings import _cam
+from etc.settings import _cam, _sys
+
 
 class _Camera_:
         
     key_map = {}
     mouse_map = {}
 
-    def __init__(self, env):
+    def __init__(self, env, name):
         self.env = env
-        self.NP = base.cam
-        self.LENS = self.NP.node().getLens()
+        self.cam_node = Camera(name+"_cam")
+        self.NP = NodePath(self.cam_node)
+        self.LENS = self.cam_node.getLens()
         self.LENS.setFar(_cam.FAR)
         self.FOCUS = None
         
@@ -154,4 +156,34 @@ class Surface_Camera(_Camera_):
         
 
         
+class Preview_Camera(_Camera_):
+    
+    cmd_map = {'y_move':"_mouse3",
+               'x_move':"_mouse1",
+               'z_move':"_mouse1"}
+    
+    zoom_factor = .005
+    move_factor = 1/float(_sys.SCREEN_WIDTH)
+
+    
+    def _handle_user_events_(self, ue, dt, delta=LVector3f()):
+        delta.set(0,0,0)
+        cmds = ue.get_cmds(self)
+        dist = -self.NP.getY()
+        
+        # Handle mouse based movement.
+        if "y_move" in cmds:
+            new_y = ue.y_diff*dist*self.zoom_factor
+            delta.setY(new_y)
+        if "x_move" in cmds:
+            delta.setX(-ue.x_diff*dist*self.move_factor)
+        if "z_move" in cmds:
+            delta.setZ(ue.y_diff*dist*self.move_factor)
+        
+        pos = self.NP.getPos() + delta
+        self.NP.setPos(pos)
+
+class Dummy_Camera(_Camera_):
+    pass
+
 

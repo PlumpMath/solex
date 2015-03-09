@@ -41,7 +41,7 @@ class Menu_Table(gui.Button):
         for i, row_list in enumerate(self.row_list):
             attrs = {'place':       {'anchor':"n",'top':i*self.row_height},
                      'children':    row_list,
-                     '_sys_recipe': self.CTRL.sys_recipes[self.row_list[i][0].lower()]}
+                     '_sys_recipe': self.CTRL.client.sys_recipes[self.row_list[i][0].lower()]}
             row = self.__class__.Table_Row(self, **attrs)
             self.Children.append(row)
         self.Window.mouse_event_widgets.extend(self.Children)
@@ -154,7 +154,7 @@ class Local_Menu(_Menu_):
     # Public.
     def open(self):
         self._sys_list = []
-        for sys_name, sr in self.CTRL.sys_recipes.items():
+        for sys_name, sr in self.CTRL.client.sys_recipes.items():
             sys_row = [sys_name, sr['_stars'], sr['_planets'], sr['_moons'], sr['_total']]
             self._sys_list.append(sys_row)
         self.refresh(self._sys_list)
@@ -166,7 +166,7 @@ class Local_Menu(_Menu_):
     # Events.
     def _row_clk(self, row):
         sys_name = row.Children[0].text
-        self.CTRL.launch_system_local(sys_name)
+        self.CTRL.launch_pre_view(sys_name)
         
 class Net_Menu(_Menu_):
     name = "Net"
@@ -287,4 +287,27 @@ class Lobby_Win(gui.Window):
     
 
 
+# ------------
+# Pre_View GUI
+# ------------
+
+class Pre_View_Win(gui.Window):
+    
+    def update(self, sys):
+        self.System_Banner.set_text(sys.name)
+        
+    # Children.
+    class System_Banner(gui.Text):
+        text = ""
+        font = TITLE_FONT
+        place = {'anchor':"n",'top':0}            
+
+    children = [System_Banner]
+    
+    def __children__(self):
+        gui.Window.__children__(self)
+        self.System_Banner = self.Children[0]
+
+
+    
 

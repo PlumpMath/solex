@@ -1,8 +1,8 @@
-// Earth.
-warm terran Earth:
-    $name           "Earth"
+// Moon.
+warm mercurian Moon:
+    $name           "Moon"
     $radius         6371
-    $mass           5.9736*10**24
+    $mass           7.3477*10**22
     $height_max     8.848 * 4
     $height_min     -11.103 * 5 - .25
     $height_map     "earth_height.jpg"
