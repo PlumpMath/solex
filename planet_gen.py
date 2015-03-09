@@ -12,9 +12,3 @@ if __name__ == "__main__":
     planet_gen = Planet_Gen()
     planet_gen.launch("earth")
     run()
-
-    '''from math import log2, floor
-    
-    fart = (43000,28324,12032,6242,3023,1262,802,312,182,101)
-    for i, f in enumerate(fart):
-        print(floor(log2(f))-7)'''

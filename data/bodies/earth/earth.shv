@@ -1,6 +1,7 @@
 
 // Earth.
 warm terran Earth:
+    $name           "Earth"
     $radius         6371
     $height_max     8.848 * 4
     $height_min     -11.103 * 5 - .25

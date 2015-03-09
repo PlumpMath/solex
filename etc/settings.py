@@ -35,10 +35,18 @@ class _env:
     STAR_RADIUS = 889999
     ATMOS_RADIUS = 880000
     AMBIENT_FACTOR = 0.001
-    ## AMBIENT = 0.02
+
+# Simulator.
+class _sim:
+    MAX_LOCAL_BODIES = 1000
+    LOCAL_THROTTLE = 2
 
 # Camera.
 class _cam:
     FAR = 1000000
+    
+# Command maps.
+class _maps:
+    client = {'exit':"escape"}
 
 

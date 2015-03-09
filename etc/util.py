@@ -2,15 +2,19 @@
 # Solex - util.py
 # ===============
 
-# Panda3d imports.
+# System.
+from datetime import datetime
+from time import sleep
+
+# Panda3d.
 from panda3d.core import NodePath, ClockObject, Filename, Texture
 from panda3d.core import Shader, ShaderAttrib, PNMImage, InternalName
-# Geom imports.
+# Geom.
 from panda3d.core import GeomVertexWriter, GeomVertexReader
 from panda3d.core import GeomVertexData, GeomVertexFormat, GeomVertexArrayFormat
 from panda3d.core import Geom, GeomNode, GeomTriangles, GeomPatches
 
-# Local imports.
+# Local.
 from etc.settings import _path
 
 
@@ -29,6 +33,28 @@ class TimeIt:
             if attr in ("msg", "clock", "start_dt"): continue
             print("  {}:  {}".format(attr, self.__dict__[attr]))
 
+# Loop throttle.
+class Throttle:
+    
+    def __init__(self, hz):
+        if hz < 1: hz = 1.0
+        self.clock = ClockObject()
+        self.max_dur = 1.0/float(hz)
+    
+    def __enter__(self):
+        self.start_dt = self.clock.getRealTime()
+        return self
+
+    def __exit__(self, *e_info):
+        e_dt = self.clock.getRealTime()
+        dur = e_dt-self.start_dt
+        pause = self.max_dur-dur
+        while pause > 0.0:
+            sleep(pause)
+            dt = self.clock.getRealTime()
+            pause -= dt-e_dt
+            e_dt = dt
+            
 class Geom_Builder:
     
     field_types = {

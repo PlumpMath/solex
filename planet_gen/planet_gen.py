@@ -60,4 +60,5 @@ class Planet_Gen:
         cmds = ue.get_cmds(self)
         if "exit" in cmds:
             print("exit")
-            self._alive = False
+            ## self._alive = False
+

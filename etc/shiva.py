@@ -127,6 +127,7 @@ class Shiva_Compiler:
         block_stack = []
         _ignore = False
         _prev_indent = 0
+        _totals = {'_stars':0,'_planets':0,'_moons':0,'_total':0}
         
         for line in lines:
             strip_line = line.strip()
@@ -149,7 +150,7 @@ class Shiva_Compiler:
             
             # End block.
             if indent < _prev_indent:
-                for tabs in range((_prev_indent-indent) / 4):
+                for tabs in range(int((_prev_indent-indent) / 4)):
                     block_stack.pop(-1)
                                     
             # New block.
@@ -170,6 +171,13 @@ class Shiva_Compiler:
                         star_name, cls_str = tokens[1].split("(")
                         star_cls = cls_str.replace("):", "")
                         new_block.update(STAR_SPECS_DICT[star_cls])
+                        new_block['name'] = star_name
+                        _totals['_stars'] += 1
+                    elif tokens[0] == "planet":
+                        _totals['_planets'] += 1
+                    elif tokens[0] == "moon":
+                        _totals['_moon'] +=1
+                    _totals['_total'] += 1
             
             # Body sys property definitions.
             elif tokens[0].startswith("$"):
@@ -183,10 +191,11 @@ class Shiva_Compiler:
                         t = "({}, {})".format(t1, t2)
                     toks.append(t.strip())
                 tok_str = " ".join(toks)
-                block_stack[-1][property_name] = eval(tok_str)   
+                block_stack[-1][property_name] = eval(tok_str)
+            _prev_indent = indent
         
         recipe = block_stack[0]
-
+        recipe.update(_totals)
         return recipe
 
 
