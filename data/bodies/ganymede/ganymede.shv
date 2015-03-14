@@ -1,0 +1,7 @@
+// Ganymede.
+cold mercurian Ganymede:
+    $radius         2634
+    $mass           1.4819*10**23
+
+    $colour_map     "ganymede_colour.jpg"
+

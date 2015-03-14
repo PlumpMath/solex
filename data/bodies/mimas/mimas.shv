@@ -1,0 +1,7 @@
+// Mimas.
+cold mercurian Mimas:
+    $radius         198
+    $mass           3.7439*10**19
+
+    $colour_map     "mimas_colour.jpg"
+

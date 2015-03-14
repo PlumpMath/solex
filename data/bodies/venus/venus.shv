@@ -1,0 +1,7 @@
+// Venus.
+hot terran Venus:
+    $radius         6051
+    $mass           4.8685*10**24
+
+    $colour_map     "venus_colour.jpg"
+

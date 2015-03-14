@@ -16,7 +16,7 @@ from .settings import _path
 # Body Qualifiers.
 BODY_QUALS = ("hellish", "hot", "warm", "cool", "cold",
               "sub", "super",
-              "mercurian", "terran", "neptunian", "jovian",)
+              "mercurian", "terran", "neptunian", "jovian", "asteroid")
               
 # Body Property Qualifiers.
 TERRAIN_QUALS = ("terrain", "sea")
@@ -24,33 +24,47 @@ TERRAIN_QUALS = ("terrain", "sea")
 # System Qualifiers.
 SYS_QUALS = ("star", "planet", "moon", "planetoid", "asteroid", "comet")
 
-# Body Templates.
-BODY_TEMPLATES = {
-    "terran":{
-        'far_lod':  [(6,400000), (7,160000), (8,0)],
-        'near_lod': [(.04,15,16), (.08,11,12), (.16,7,8), (.32,5,6), (.64,3,4), (1.28,1,2), (2.56,0,2)],
-        'tex_lod':  [(0,100,12), (50,250,6), (175,575,3), (400,1200,1)],
-        'tess_lod': [(.25,1), (.5,2), (1,4), (2,8)]
-    },
-    "sub_terran":{
-        'far_lod':  [(6,400000), (7,160000), (8,0)],
-        'near_lod': [(.04,15,16), (.08,11,12), (.16,7,8), (.32,5,6), (.64,3,4), (1.28,1,2), (2.56,0,2)],
-        'tex_lod':  [(0,100,12), (50,250,6), (175,575,3), (400,1200,1)],
-        'tess_lod': [(.25,1), (.5,2), (1,4), (2,8)]
-    },
-    "mercurian":{
-        'far_lod':  [(6,400000), (7,160000), (8,0)],
-        'near_lod': [(.04,15,16), (.08,11,12), (.16,7,8), (.32,5,6), (.64,3,4), (1.28,1,2), (2.56,0,2)],
-        'tex_lod':  [(0,100,12), (50,250,6), (175,575,3), (400,1200,1)],
-        'tess_lod': [(.25,1), (.5,2), (1,4), (2,8)]
-    }
-}
+
 
 # Star class dict.
 STAR_SPECS_DICT = {
     'G2V':{ 'radius':696342,    'mass':1.9891*10**30,   'colour':(1,.961,.925,1)},
 }
 
+# Body Templates.
+_default = {
+    'preview_rec': 6,
+    'preview_mode': "simple",
+    'far_lod':  [(6,400000), (7,160000), (8,0)],
+    'near_lod': [(.04,15,16), (.08,11,12), (.16,7,8), (.32,5,6), (.64,3,4), (1.28,1,2), (2.56,0,2)],
+    'tex_lod':  [(0,100,12), (50,250,6), (175,575,3), (400,1200,1)],
+    'tess_lod': [(.25,1), (.5,2), (1,4), (2,8)]
+}
+
+BODY_TEMPLATES = {
+    'sub_mercurian':_default,
+    'mercurian':_default,
+    'super_mercurian':_default,
+    'sub_terran':_default,
+    'terran':_default,
+    'super_terran':_default,
+    'sub_neptunian':_default,
+    'neptunian':_default,
+    'super_neptunian':_default,
+    'sub_jovian':_default,
+    'jovian':_default,
+    'super_jovian':_default,
+    'asteroid':_default 
+}
+
+# Body basic colours.
+BODY_COLS = {
+    'mercurian':(.4,.4,.4,1),
+    'terran':(0,.5,0,1),
+    'neptunian':(0,0,.5,1),
+    'jovian':(.5,0,0,1),
+    'asteroid':(.7,.7,.7,1)
+}
 class Shiva_Compiler:
     
     @classmethod
@@ -108,6 +122,7 @@ class Shiva_Compiler:
                         recipe['class'] = "{}_{}".format(tokens[1], tokens[2])
                     else:
                         recipe['class'] = tokens[-2]
+                    recipe['colour'] = BODY_COLS[tokens[-2]]
                     recipe.update(BODY_TEMPLATES[recipe['class']])
                     
                 # Terrain definition.
@@ -129,9 +144,7 @@ class Shiva_Compiler:
                         toks.append(t.strip())
                     tok_str = " ".join(toks)
                     current_block[property_name] = eval(tok_str)
-            
             _prev_indent = indent
-        
         return recipe
 
     def __compile_Sys_Recipe(shiva_str):
@@ -187,7 +200,7 @@ class Shiva_Compiler:
                         star_name, cls_str = tokens[1].split("(")
                         star_cls = cls_str.replace("):", "")
                         new_block.update(STAR_SPECS_DICT[star_cls])
-                        new_block['name'] = star_name
+                        new_block['name'] = star_name.lower()
                         new_block['type'] = "star"
                     elif tokens[0] == "planet" or tokens[0] == "moon":
                         body_name = tokens[1].split("(")[0].replace(":", "")

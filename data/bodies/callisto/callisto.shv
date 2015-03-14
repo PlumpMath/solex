@@ -1,0 +1,7 @@
+// Callisto.
+cold mercurian Callisto:
+    $radius         2410
+    $mass           1.0759*10**23
+
+    $colour_map     "callisto_colour.jpg"
+

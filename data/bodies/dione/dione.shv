@@ -1,0 +1,7 @@
+// Dione.
+cold mercurian Dione:
+    $radius         561.5
+    $mass           1.0955*10**21
+
+    $colour_map     "dione_colour.jpg"
+

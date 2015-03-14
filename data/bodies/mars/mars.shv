@@ -1,19 +1,9 @@
 // Mars.
 cool sub terran Mars:
-    $name           "Mars"
-    $radius         6371
+    $radius         3396
     $mass           6.4185*10**23
-    $height_max     8.848 * 4
-    $height_min     -11.103 * 5 - .25
-    $height_map     "earth_height.jpg"
-    $normal_map     "earth_norm.jpg"
-    $colour_map     "earth_colour.jpg"
-    $terrain_map    "earth_ter.png"
-    
-    terrain Land:
-        $alt_range  0->100
-        $textures   "land_near.jpg", "land_far.jpg"
 
-    terrain Sea:
-        $alt_range  -100->0
-        $textures   "sea_near.jpg", "sea_far.jpg"
+    $colour_map     "mars_colour.jpg"
+    $preview_mode   "detailed"
+    $pre_colour_map "mars_colour_pre.jpg"
+

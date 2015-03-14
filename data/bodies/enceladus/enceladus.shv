@@ -1,0 +1,7 @@
+// Enceladus.
+cold mercurian Enceladus:
+    $radius         252
+    $mass           1.0802*10**20
+
+    $colour_map     "enceladus_colour.jpg"
+

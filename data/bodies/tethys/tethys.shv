@@ -1,0 +1,7 @@
+// Tethys.
+cold mercurian Tethys:
+    $radius         531
+    $mass           6.1745*10**20
+
+    $colour_map     "tethys_colour.jpg"
+

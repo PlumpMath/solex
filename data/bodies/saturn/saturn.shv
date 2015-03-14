@@ -1,0 +1,8 @@
+// Saturn.
+cold sub jovian Saturn:
+    $radius         58232
+    $mass           5.6846*10**26
+
+    $colour_map     "saturn_colour.jpg"
+    $default_rec    7
+

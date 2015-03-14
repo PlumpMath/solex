@@ -1,0 +1,5 @@
+// Puck.
+cold mercurian Puck:
+    $radius         81
+    $mass           2.9*10**18
+

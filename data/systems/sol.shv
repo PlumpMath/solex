@@ -6,17 +6,191 @@ star Sol(G2V):
     $inclination    0
     $spin           0
     
+    // Inner.
+    planet Mercury:
+        $aphelion       69816900
+        $sm_axis        57909100
+        $inclination    3.38
+        $tilt           2.04
+        $tilt_rasc      281.01
+        $spin           173.82
+        
+    planet Venus:
+        $aphelion       108939000
+        $sm_axis        108208000
+        $inclination    3.86
+        $tilt           177.36
+        $tilt_rasc      272.76
+        $spin           24
+    
     planet Earth:
         $aphelion       152098232
         $sm_axis        149598261
-        $perhilion      147098290
-        $inclination    0
+        $inclination    7.155
+        $tilt           23.26
+        $tilt_rasc      0
         $spin           24
+        
+        moon Moon:
+            $aphelion       405410
+            $sm_axis        384399
+            $inclination    23.26
+            $tilt           1.54
+            $tilt_rasc      0
+            $spin           -1
     
     planet Mars:
-        $aphelion       500098232
-        $sm_axis        499598261
-        $perhilion      497098290
-        $inclination    0
+        $aphelion       249209300
+        $sm_axis        227939100
+        $inclination    1.85
+        $tilt           25.19
+        $tilt_rasc      315.68
         $spin           24
+        
+        moon Phobos:
+            $aphelion       9517
+            $sm_axis        9376
+            $inclination    1.093
+            
+        moon Deimos:
+            $aphelion       23470
+            $sm_axis        23463
+            $inclination    0.93
+
+    // Jupiter.
+    planet Jupiter:
+        $aphelion       816520800
+        $sm_axis        778547200
+        $inclination    1.3
+        $tilt           3.13
+        $tilt_rasc      2.68
+        $spin           24
+        
+        moon Io:
+            $aphelion       423400
+            $sm_axis        421700
+            $inclination    0.05
+            
+        moon Europa:
+            $aphelion       676938
+            $sm_axis        670900
+            $inclination    0.47
+            
+        moon Ganymede:
+            $aphelion       1071600
+            $sm_axis        1070400
+            $inclination    0.2
+            
+        moon Callisto:
+            $aphelion       1897000
+            $sm_axis        1882700
+            $inclination    0.192
+        
+    // Saturn.
+    planet Saturn:
+        $aphelion       1513325783
+        $sm_axis        1433449370
+        $inclination    2.485
+        $tilt           26.73
+        $tilt_rasc      40.6
+        $spin           24
+        
+        moon Mimas:
+            $aphelion       189176
+            $sm_axis        185539
+            $inclination    1.574
+            
+        moon Enceladus:
+            $aphelion       239156
+            $sm_axis        237948
+            $inclination    0.019
+            
+        moon Tethys:
+            $aphelion       294619
+            $sm_axis        294619
+            $inclination    1.12
+            
+        moon Dione:
+            $aphelion       377396
+            $sm_axis        377396
+            $inclination    0.192
+        
+        moon Rhea:
+            $aphelion       527108
+            $sm_axis        527108
+            $inclination    0.345
+            
+        moon Titan:
+            $aphelion       1257060
+            $sm_axis        1221870
+            $inclination    0.348
+            
+        moon Iapetus:
+            $aphelion       3560820
+            $sm_axis        3560820
+            $inclination    15.47
+    
+    // Uranus.
+    planet Uranus:
+        $aphelion       3004419704
+        $sm_axis        2876679082
+        $inclination    0.773
+        $tilt           97.77
+        $tilt_rasc      77.43
+        $spin           24
+        
+        moon Puck:
+            $aphelion       86010
+            $sm_axis        86010
+            $inclination    0.312
+            
+        moon Miranda:
+            $aphelion       129390
+            $sm_axis        129390
+            $inclination    4.232
+            
+        moon Ariel:
+            $aphelion       191020
+            $sm_axis        191020
+            $inclination    0.260
+            
+        moon Umbriel:
+            $aphelion       266300
+            $sm_axis        266300
+            $inclination    0.128
+        
+        moon Titania:
+            $aphelion       435910
+            $sm_axis        435910
+            $inclination    0.34
+            
+        moon Oberon:
+            $aphelion       583520
+            $sm_axis        583520
+            $inclination    0.058
+
+    // Neptune.
+    planet Neptune:
+        $aphelion       4553946490
+        $sm_axis        4503443661
+        $inclination    1.85
+        $tilt           25.19
+        $tilt_rasc      315.68
+        $spin           24
+        
+        moon Proteus:
+            $aphelion       117709
+            $sm_axis        117647
+            $inclination    0.524
+            
+        moon Triton:
+            $aphelion       354759
+            $sm_axis        354759
+            $inclination    156.885
+            
+        moon Nereid:
+            $aphelion       9655000
+            $sm_axis        5513787
+            $inclination    7.09
+
 

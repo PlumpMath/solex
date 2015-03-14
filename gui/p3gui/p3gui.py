@@ -441,7 +441,8 @@ class _Widget_:
         self._Render(grid, place)
     def destroy(self):
         self.NP.removeNode()
-        self.Master.Children.remove(self)
+        if self in self.Master.Children:
+            self.Master.Children.remove(self)
         self.Window.remove_widget(self)
         for child in self.Children:
             child.destroy()
@@ -458,6 +459,9 @@ class _Widget_:
     def get_family(self, verbose=False):
         """Returns a flat list of all children and sub-children."""
         return self.__get_Family()
+    def clear_children(self):
+        for child in self.Children:
+            child.destroy()
             
     # Main Loop.
     def _drag_(self):
@@ -475,7 +479,7 @@ class _Widget_:
         # Build widget.
         self.__map__(attrs)
         self.__wid__()
-        self.__children__()
+        self.__children__()   ## self.__class__.__children__ instead??
         self.__layer__()
         self.NP.setName(self.wid)
         self.layout.refresh()
@@ -1018,7 +1022,7 @@ class _Value_Keeper_:
 
 class _Obj_Tracker_:
     _track_obj = None
-    _hide_dist = 0
+    hide_dist = 0
     
     # Main Loop.
     def _track_(self):
@@ -1027,9 +1031,9 @@ class _Obj_Tracker_:
         if pos == self._prev_pos:
             return None
         # Show/hide widget based on "_hide_dist" attr if given.
-        if self._hide_dist > 0:
+        if self.hide_dist > 0:
             dist = pos.length()
-            if dist <= self._hide_dist:
+            if dist <= self.hide_dist:
                 self.NP.show()
             else:
                 self.NP.hide()
@@ -1062,6 +1066,9 @@ class Window(_Widget_):
         self._x_max, self._y_max = self.size
         for child in self.Children:
             child.render()
+        self._hw = base.win.getXSize()/2
+        self._hh = base.win.getYSize()/2
+        self._unit_y = tan(radians(90-self.CTRL.client.camLens.getFov()[0]/2)) * self._hw
     def add_widget(self, widget):
         self.add_widgets([widget])
     def add_widgets(self, widgets):
@@ -1072,10 +1079,6 @@ class Window(_Widget_):
         self.__remove_Widgets(widgets)
     
     # Setup.
-    def __map__(self, attrs):
-        _Widget_.__map__(self, attrs)
-        self.size = (self.CTRL.client.win.getXSize(), self.CTRL.client.win.getYSize())
-        self._unit_y = tan(radians(90-self.CTRL.client.camLens.getFov()[0]/2)) * self.__class__._hw
     def __init__(self, ctrl):
         self.CTRL = ctrl
         self.Window = self
@@ -2063,7 +2066,7 @@ class Dialog(Container):
             
         # Children.
         class Name(Text):
-            place = {'anchor':"w",'left':0}
+            place = {'anchor':"w",'left':12}
             
         class X_Button(Button):
             text = "x"

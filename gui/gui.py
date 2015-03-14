@@ -23,6 +23,25 @@ TITLE_FONT = {
     'size':72,
     'colour':MENU_COL}
 
+PLANET_LABEL_FONT = {
+    'name':"arial.ttf",
+    'size':20,
+    'colour':FONT_COL
+}
+
+STAR_LABEL_FONT = {
+    'name':"arial.ttf",
+    'size':36,
+    'colour':(0,0,0,1)
+}
+
+
+class _Window_(gui.Window):
+    
+    # Setup.
+    def __map__(self, attrs):
+        gui.Window.__map__(self, attrs)
+        self.size = (self.CTRL.client.win.getXSize(), self.CTRL.client.win.getYSize())
 
 # ---------
 # Lobby GUI
@@ -166,7 +185,7 @@ class Local_Menu(_Menu_):
     # Events.
     def _row_clk(self, row):
         sys_name = row.Children[0].text
-        self.CTRL.launch_pre_view(sys_name)
+        self.CTRL.to_pre_view(sys_name)
         
 class Net_Menu(_Menu_):
     name = "Net"
@@ -263,7 +282,7 @@ class Main_Button_Container(gui.Container):
         self.layout.refresh({'col_widths':col_widths})
     
 # Lobby Window.
-class Lobby_Win(gui.Window):
+class Lobby_Win(_Window_):
     
     # Children.
     class Title_Banner(gui.Text):
@@ -283,31 +302,91 @@ class Lobby_Win(gui.Window):
                 Settings_Menu,
                 Docs_Menu,
                 Main_Button_Container]
-
-    
+                
 
 
 # ------------
 # Pre_View GUI
 # ------------
 
-class Pre_View_Win(gui.Window):
+class Pre_View_Win(_Window_):
     
     def update(self, sys):
-        self.System_Banner.set_text(sys.name)
-        
+        self.System_Banner.set_text("{} System".format(sys.name.title()))
+    def add_star_label(self, star):
+        self.labels.append(self.__add_Star_Label(star))
+    def add_planet_label(self, planet, mode):
+        self.labels.append(self.__add_Planet_Label(planet, mode))
+    def clear_labels(self):
+        for label in self.labels:
+            label.destroy()
+        self.labels = []
+
     # Children.
     class System_Banner(gui.Text):
         text = ""
-        font = TITLE_FONT
-        place = {'anchor':"n",'top':0}            
+        font = {'name':"arial.ttf",'size':42,'colour':FONT_COL}
+        bg = (0,0,0,.5)
+        pad = (10, 12)
+        place = {'anchor':"nw",'top':12,'left':0}            
 
     children = [System_Banner]
     
     def __children__(self):
         gui.Window.__children__(self)
         self.System_Banner = self.Children[0]
+        self.labels = []
+
+
+    def __add_Star_Label(self, star):
+        class Star_Label(gui.Button, gui._Obj_Tracker_):
+            wid = "{}_label".format(star.name)
+            font = STAR_LABEL_FONT
+            text = star.name.title()
+            _track_obj = star.preview_model
+            def __init__(self, master, **attrs):
+                gui.Button.__init__(self, master, **attrs)
+                self._prev_pos = self._track_obj.getPos(self.CTRL.CAMERA.NP)
+        star_label = Star_Label(self)
+        star_label.render()
+        self.add_widget(star_label)
+        return star_label
+
+    def __add_Planet_Label(self, planet, mode):
+        label_np = planet.pre_model_np.find("planet_label")
+        if mode == "vertical":
+            label_np.setPos(-planet.radius*2, 0, 0)
+            anchor = "e"
+        else:
+            label_np.setPos(0, 0, planet.radius*1.1)
+            anchor = "s"
+            
+        class Planet_Label(gui.Button, gui._Obj_Tracker_):
+            wid = "{}_label".format(planet.name.lower())
+            font = PLANET_LABEL_FONT
+            text = planet.name.title()
+            place = {'anchor':anchor}
+            display = True
+            _track_obj = label_np
+            hide_dist = planet.radius
+            
+            def _on_mouse1_up(self, ue, planet=planet):
+                self.CTRL.to_env(planet.name)
+                
+            def __init__(self, master, **attrs):
+                gui.Button.__init__(self, master, **attrs)
+                self._prev_pos = self._track_obj.getPos(self.CTRL.CAMERA.NP)
+                
+        planet_label = Planet_Label(self)
+        planet_label.render()
+        self.add_widget(planet_label)
+        return planet_label
+
 
 
     
+class Env_Win(gui.Window):
+    
+    pass
+
 

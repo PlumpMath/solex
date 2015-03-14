@@ -32,19 +32,31 @@ expanded="cslos77.20150302085211.7,"><vh>@shadow client.py</vh></v>
 </v>
 <v t="cslos77.20141120192122.10" a="E"><vh>@path solex</vh>
 <v t="cslos77.20150302085211.122" a="E"
-expanded="cslos77.20150302085211.70,cslos77.20150302085211.124,"><vh>@shadow views.py</vh></v>
-<v t="cslos77.20150302085211.123" a="E"><vh>@shadow bodies.py</vh></v>
-<v t="cslos77.20141120192122.11"><vh>@shadow environment.py</vh></v>
-<v t="cslos77.20141120192122.13" a="E"><vh>@shadow cameras.py</vh></v>
+expanded="cslos77.20150302085211.70,cslos77.20150302085211.124,cslos77.20141120192122.18,"><vh>@shadow environments.py</vh></v>
+<v t="cslos77.20150302085211.123" a="E"
+expanded="cslos77.20150312034730.2,cslos77.20150302085211.128,"><vh>@shadow bodies.py</vh></v>
+<v t="cslos77.20141120192122.11"
+expanded="cslos77.20141120192122.35,"><vh>@shadow environment.py</vh></v>
+<v t="cslos77.20141120192122.13" a="E"
+expanded="cslos77.20141120192122.15,cslos77.20150302085211.131,"><vh>@shadow cameras.py</vh></v>
 <v t="cslos77.20141122021629.8"><vh>@shadow shader.py</vh></v>
 <v t="cslos77.20141213043440.2"><vh>@shadow texture.py</vh></v>
-<v t="cslos77.20150302085211.104"
+<v t="cslos77.20150302085211.104" a="E"
 expanded="cslos77.20150302085211.105,"><vh>@shadow simulator.py</vh></v>
 </v>
-<v t="cslos77.20141120192122.8"><vh>@path planet_gen</vh>
+<v t="cslos77.20141120192122.8" a="E"><vh>@path planet_gen</vh>
 <v t="cslos77.20141120192122.28"
 expanded="cslos77.20141120192122.29,"><vh>@shadow planet_gen.py</vh></v>
 <v t="cslos77.20141120192122.52"><vh>@shadow model.py</vh></v>
+</v>
+<v t="cslos77.20141120192122.20"><vh>@path gui</vh>
+<v t="cslos77.20141120192122.22"><vh>@shadow ueh.py</vh></v>
+<v t="cslos77.20150302085211.9"><vh>@path p3gui</vh>
+<v t="cslos77.20150302085211.12" a="E"
+expanded="cslos77.20150302085211.13,cslos77.20150302085211.33,cslos77.20150302085211.35,cslos77.20150302085211.46,cslos77.20150302085211.47,cslos77.20150302085211.62,"><vh>@shadow p3gui.py</vh></v>
+</v>
+<v t="cslos77.20150302085211.8" a="E"
+expanded="cslos77.20150302085211.79,cslos77.20150302085211.89,cslos77.20150302085211.137,cslos77.20150302085211.138,cslos77.20150312034730.4,"><vh>@shadow gui.py</vh></v>
 </v>
 <v t="cslos77.20141129025015.19"><vh>@path gpu</vh>
 <v t="cslos77.20141129025015.26"><vh>scripts</vh>
@@ -61,24 +73,56 @@ expanded="cslos77.20141120192122.29,"><vh>@shadow planet_gen.py</vh></v>
 <v t="cslos77.20141222013217.2"><vh>@shadow planet_FRAG.glsl</vh></v>
 </v>
 </v>
-<v t="cslos77.20141120192122.20" a="E"><vh>@path gui</vh>
-<v t="cslos77.20141120192122.22"><vh>@shadow ueh.py</vh></v>
-<v t="cslos77.20150302085211.8" a="E"
-expanded="cslos77.20150302085211.137,"><vh>@shadow gui.py</vh></v>
-<v t="cslos77.20150302085211.9" a="E"><vh>@path p3gui</vh>
-<v t="cslos77.20150302085211.12" a="E"
-expanded="cslos77.20150302085211.33,cslos77.20150302085211.35,cslos77.20150302085211.46,cslos77.20150302085211.47,cslos77.20150302085211.62,"><vh>@shadow p3gui.py</vh></v>
-</v>
-</v>
 <v t="cslos77.20141120192122.37" a="E"><vh>@path data</vh>
 <v t="cslos77.20141120192122.38" a="E"><vh>@path systems</vh>
 <v t="cslos77.20141213081755.5"><vh>@shadow _default.shv</vh></v>
 <v t="cslos77.20150302085211.108"><vh>@shadow sol.shv</vh></v>
 </v>
 <v t="cslos77.20141214080158.2" a="E"><vh>@path bodies</vh>
+<v t="cslos77.20150302085211.149" a="E"><vh>Sol</vh>
+<v t="cslos77.20150302085211.150" a="E"><vh>inner</vh>
+<v t="cslos77.20150302085211.143"><vh>@shadow mercury/mercury.shv</vh></v>
+<v t="cslos77.20150302085211.144"><vh>@shadow venus/venus.shv</vh></v>
 <v t="cslos77.20141210210514.5"><vh>@shadow earth/earth.shv</vh></v>
-<v t="cslos77.20150302085211.117"><vh>@shadow mars/mars.shv</vh></v>
 <v t="cslos77.20150302085211.118"><vh>@shadow moon/moon.shv</vh></v>
+<v t="cslos77.20150302085211.117"><vh>@shadow mars/mars.shv</vh></v>
+<v t="cslos77.20150302085211.156"><vh>@shadow phobos/phobos.shv</vh></v>
+<v t="cslos77.20150302085211.157"><vh>@shadow deimos/deimos.shv</vh></v>
+</v>
+<v t="cslos77.20150302085211.151" a="E"><vh>Jupiter</vh>
+<v t="cslos77.20150302085211.145"><vh>@shadow jupiter/jupiter.shv</vh></v>
+<v t="cslos77.20150302085211.158"><vh>@shadow io/io.shv</vh></v>
+<v t="cslos77.20150302085211.159"><vh>@shadow europa/europa.shv</vh></v>
+<v t="cslos77.20150302085211.160"><vh>@shadow ganymede/ganymede.shv</vh></v>
+<v t="cslos77.20150302085211.161"><vh>@shadow callisto/callisto.shv</vh></v>
+</v>
+<v t="cslos77.20150302085211.152"><vh>Saturn</vh>
+<v t="cslos77.20150302085211.146"><vh>@shadow saturn/saturn.shv</vh></v>
+<v t="cslos77.20150302085211.162"><vh>@shadow mimas/mimas.shv</vh></v>
+<v t="cslos77.20150302085211.164"><vh>@shadow enceladus/enceladus.shv</vh></v>
+<v t="cslos77.20150302085211.165"><vh>@shadow tethys/tethys.shv</vh></v>
+<v t="cslos77.20150302085211.163"><vh>@shadow dione/dione.shv</vh></v>
+<v t="cslos77.20150302085211.166"><vh>@shadow rhea/rhea.shv</vh></v>
+<v t="cslos77.20150302085211.167"><vh>@shadow titan/titan.shv</vh></v>
+<v t="cslos77.20150302085211.168"><vh>@shadow iapetus/iapetus.shv</vh></v>
+</v>
+<v t="cslos77.20150302085211.153"><vh>Uranus</vh>
+<v t="cslos77.20150302085211.147"><vh>@shadow uranus/uranus.shv</vh></v>
+<v t="cslos77.20150302085211.169"><vh>@shadow puck/puck.shv</vh></v>
+<v t="cslos77.20150302085211.170"><vh>@shadow miranda/miranda.shv</vh></v>
+<v t="cslos77.20150302085211.171"><vh>@shadow ariel/ariel.shv</vh></v>
+<v t="cslos77.20150302085211.172"><vh>@shadow umbriel/umbriel.shv</vh></v>
+<v t="cslos77.20150302085211.174"><vh>@shadow titania/titania.shv</vh></v>
+<v t="cslos77.20150302085211.173"><vh>@shadow oberon/oberon.shv</vh></v>
+</v>
+<v t="cslos77.20150302085211.154"><vh>Neptune</vh>
+<v t="cslos77.20150302085211.148"><vh>@shadow neptune/neptune.shv</vh></v>
+<v t="cslos77.20150302085211.175"><vh>@shadow proteus/proteus.shv</vh></v>
+<v t="cslos77.20150302085211.176"><vh>@shadow triton/triton.shv</vh></v>
+<v t="cslos77.20150302085211.177"><vh>@shadow nereid/nereid.shv</vh></v>
+</v>
+<v t="cslos77.20150302085211.155"><vh>outer</vh></v>
+</v>
 </v>
 </v>
 <v t="cslos77.20141122021629.14"><vh>@path test</vh>
@@ -266,6 +310,13 @@ mom = momentum($TARGET)
 tor = torque($TARGET)
 pos = position($TARGET)
 </t>
+<t tx="cslos77.20150302085211.149"></t>
+<t tx="cslos77.20150302085211.150"></t>
+<t tx="cslos77.20150302085211.151"></t>
+<t tx="cslos77.20150302085211.152"></t>
+<t tx="cslos77.20150302085211.153"></t>
+<t tx="cslos77.20150302085211.154"></t>
+<t tx="cslos77.20150302085211.155"></t>
 <t tx="cslos77.20150302085211.3"></t>
 <t tx="cslos77.20150302085211.9"></t>
 </tnodes>

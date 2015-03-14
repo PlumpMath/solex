@@ -1,0 +1,7 @@
+// Uranus.
+cold neptunian Uranus:
+    $radius         25632
+    $mass           8.681*10**25
+
+    $colour_map     "uranus_colour.jpg"
+

@@ -1,0 +1,7 @@
+// Neptune.
+cold neptunian Neptune:
+    $radius         24622
+    $mass           1.0243*10**26
+
+    $colour_map     "neptune_colour.jpg"
+

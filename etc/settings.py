@@ -9,8 +9,8 @@ from os import path
 # ------
 
 class _sys:
-    SCREEN_WIDTH = 1920
-    SCREEN_HEIGHT = 1080
+    SCREEN_W = 1920
+    SCREEN_H = 1080
 
 # File system.
 class _path:

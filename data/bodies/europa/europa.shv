@@ -1,0 +1,7 @@
+// Europa.
+cold mercurian Europa:
+    $radius         1560
+    $mass           4.799*10**22
+
+    $colour_map     "europa_colour.jpg"
+

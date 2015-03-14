@@ -1,0 +1,7 @@
+// Rhea.
+cold mercurian Rhea:
+    $radius         763.5
+    $mass           2.3065*10**21
+
+    $colour_map     "rhea_colour.jpg"
+

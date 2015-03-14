@@ -1,0 +1,7 @@
+// Iapetus.
+cold mercurian Iapetus:
+    $radius         734.5
+    $mass           1.8056*10**21
+
+    $colour_map     "iapetus_colour.jpg"
+

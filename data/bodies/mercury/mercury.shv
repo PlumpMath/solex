@@ -1,0 +1,7 @@
+// Mercury.
+hot mercurian Mercury:
+    $radius         2440
+    $mass           3.3022*10**23
+    
+    $colour_map     "mercury_colour.jpg"
+

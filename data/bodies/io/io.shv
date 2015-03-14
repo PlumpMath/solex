@@ -1,0 +1,7 @@
+// Io.
+cold mercurian Io:
+    $radius         1821
+    $mass           8.9319*10**22
+
+    $colour_map     "io_colour.jpg"
+

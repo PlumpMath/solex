@@ -1,0 +1,10 @@
+// Jupiter.
+cold jovian Jupiter:
+    $radius         69911
+    $mass           1.8986*10**27
+    
+    $colour_map     "jupiter_colour.jpg"
+    $previev_rec    7
+    $preview_mode   "detailed"
+    $pre_colour_map "jupiter_colour_pre.jpg"
+

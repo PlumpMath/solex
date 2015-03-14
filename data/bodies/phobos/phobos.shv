@@ -1,0 +1,5 @@
+// Phobos.
+cool asteroid Phobos:
+    $radius         11.2
+    $mass           1.0659*10**16
+

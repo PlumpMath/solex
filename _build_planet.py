@@ -4,29 +4,34 @@
 
 # System imports.
 import sys
-from importlib import import_module
+from os import listdir
 
 # Panda3d imports.
 from panda3d.core import ConfigVariableString, Filename
 
 # Local imports.
 from etc.settings import _path
+from etc.util import TimeIt
 from planet_gen.model import Planet_Builder
 
 if __name__ == "__main__":
-    from sys import exit
-    import direct.directbase.DirectStart
-    base.disableMouse()
-    
-    planet_name = sys.argv[1].lower()
-    shv_path = Filename("{}/{}/{}.shv".format(_path.BODIES, planet_name, planet_name))
-    with open(shv_path.toOsLongName()) as shv_file:
-        lines = shv_file.readlines()
-    shiva_str = "".join(lines)
-    
+    args = sys.argv[1:]
+    qual = None
+    if args[0] in ("preview", "low", "high"):
+        qual = args.pop(0)
+    if args[-1] == "all":
+        args = listdir(Filename(_path.BODIES).toOsLongName())
+
     pb = Planet_Builder()
-    planet_np = pb.init(shiva_str)
-    pb.build(planet_np)
-    pb.save(planet_np, planet_name)
+    if qual == "preview": build = pb.build_preview_model
+    elif qual == "low": build = pb.build_low_model
+    elif qual == "high": build = pb.build_high_model
+    else: build = pb.build_all
+    
+    for planet_name in args:
+        if planet_name.startswith("."): continue
+        with TimeIt(planet_name):
+            planet = build(planet_name)
+            planet.save()
 
 

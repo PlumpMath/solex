@@ -1,0 +1,7 @@
+// Titan.
+cold mercurian Titan:
+    $radius         2575.5
+    $mass           1.345*10**23
+
+    $colour_map     "titan_colour.jpg"
+
