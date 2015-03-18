@@ -38,6 +38,10 @@ STAR_LABEL_FONT = {
 
 class _Window_(gui.Window):
     
+    # Public.
+    def set_widget_text(self, wid, text):
+        self.c_dict[wid].set_text(text)
+    
     # Setup.
     def __map__(self, attrs):
         gui.Window.__map__(self, attrs)
@@ -384,9 +388,35 @@ class Pre_View_Win(_Window_):
 
 
 
+# -------
+# Env_GUI
+# -------
+
+# Env Window.
+class Env_Win(_Window_):
     
-class Env_Win(gui.Window):
+    # Children.
+    class Focus_Banner(gui.Text):
+        text = "-none-"
+        font = {'name':"arial.ttf",'size':48,'colour':MENU_COL}
+        place = {'anchor':"ne",'top':10,'right':0}
+        bg = (0,0,0,.5)
+
+    class Focus_Dist(gui.Text):
+        text = "-none-"
+        font = {'name':"arial.ttf",'size':20,'colour':(.5,.5,.5,1)}
+        place = {'anchor':"ne",'top':64,'right':0}
+        bg = (0,0,0,.5)
     
-    pass
+    children = [Focus_Banner,
+                Focus_Dist]
+                
+
+
+    def _update_(self, ue, dt):
+        focus_dist = str(round(self.CTRL.client.ENV.CAMERA.focus_dist, 2))
+        ## print(focus_dist)
+        self.c_dict['env_win.focus_dist'].set_text(focus_dist)
+
 
 

@@ -3,11 +3,12 @@
 # ===============
 
 # System.
+from multiprocessing import Process, Queue
 from datetime import datetime
 from time import sleep
 
 # Panda3d.
-from panda3d.core import NodePath, ClockObject, Filename, Texture
+from panda3d.core import NodePath, ClockObject, Filename, Texture, Loader
 from panda3d.core import Shader, ShaderAttrib, PNMImage, InternalName
 # Geom.
 from panda3d.core import GeomVertexWriter, GeomVertexReader
@@ -131,6 +132,54 @@ class Geom_Builder:
         geom_np = NodePath(geom_node)
         return geom_np
 
+
+class Model_Loader:
+    
+    # Public.
+    def load_model(self, file_name, call_back, args=[], priority=1):
+        self.__call_backs['file_name'] = (call_back, args)
+        print("IN:", file_name)
+        self.in_Q.put(file_name)
+    def close(self):
+        self.in_Q.put("close")
+    def flush(self):
+        while not self.out_Q.empty():
+            file_name, geom = self.out_Q.get()
+            cb, args = self.__call_backs.pop(file_name)
+            cb(model, *args)
+        
+    # Callbacks.
+    def _on_close(self, model):
+        self.__in_Q.join_thread()
+        self.__out_Q.join_thread()
+        self.__load_proc.join()
+    
+    # Setup.
+    def __init__(self):
+        self.in_Q = Queue()
+        self.out_Q = Queue()
+        ## self.fart_node = NodePath("fart")
+        self.__call_backs = {'close':self._on_close}
+        self.__load_proc = Process(target=self._loader_, args=(self.in_Q, self.out_Q))
+        self.__load_proc.start()
+
+    # Main loop.
+    def _loader_(self, in_Q, out_Q):
+        _alive = True
+        # print("FART", self.fart_node)
+        loader = Loader()
+        while _alive:
+            file_name = in_Q.get()
+            if file_name == "close":
+                model = None
+                _alive = False
+            else:
+                model = loader.loadSync(file_name)
+                geom = NodePath(model.getChildren()[0])
+                geom = geom.__reduce_persist__(geom)
+                ## mp = pickler.dumps(model)
+                print("OUT:", model)
+            out_Q.put((file_name, geom))
 
 
 

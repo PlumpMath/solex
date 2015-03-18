@@ -1169,7 +1169,12 @@ class Window(_Widget_):
                 for member in group:
                     if member._takes_mouse_events:
                         member._update_event_box_()
+                        
+        self._update_(ue, dt)
 
+
+    def _update_(self, ue, dt):
+        pass
 
     def __add_Widgets(self, widgets):
         for widget in widgets:
@@ -1310,8 +1315,8 @@ class Text(_Widget_):
     # Public.
     def set_text(self, text, resize=False):
         if text == self.text: return
-        self.text = text
-        self.text_node.setText(text)
+        self.text = str(text)
+        self.text_node.setText(self.text)
         self.size = self.get_size()
         self.render()
     def get_size(self, isnan=isnan):
@@ -1433,7 +1438,7 @@ class Button(_Mouse_Event_Handler_, Container):
     # Public.
     def set_text(self, text):
         self.text = text
-        self.rebuild()
+        self.Children[0].set_text(text)
     
     # Children.
     class Text(Text):

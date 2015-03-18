@@ -20,7 +20,7 @@ class _Camera_:
         if self.FOCUS and obj is self.FOCUS: return
         self.FOCUS = obj
         self.focus_radius = obj.radius
-        self.radius = self.focus_radius * 5
+        self.radius = self.focus_radius * 12
         self.focus_pos.set(0, self.radius-obj.radius, 0)
         obj_state = self.env.client.SIM.get_object_state(obj.name, ["sys_pos"])
         obj.sys_pos = LVector3d(*obj_state['sys_pos'])
@@ -42,6 +42,7 @@ class _Camera_:
         self.sys_pos = LVector3d(0,0,0)
         self.radius = 1
         self.focus_radius = 1
+        self.focus_dist = 0
     
 
 
@@ -78,6 +79,7 @@ class Orbital_Camera(_Camera_):
         self.focus_pos += delta
         self.sys_pos = self.FOCUS.sys_pos - self.focus_pos
         self.NP.lookAt(LPoint3f(*self.focus_pos))
+        self.focus_dist = self.focus_pos.length()/self.focus_radius  # gui.
         
 
 class Surface_Camera(_Camera_):

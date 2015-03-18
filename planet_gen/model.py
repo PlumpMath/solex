@@ -278,6 +278,7 @@ class Sphere_Builder:
         u_vec.normalize()
         lon = u_vec.angleDeg(ref_vec)
         if x < 0: lon = 180 + (180-lon)
+        lon -= 180
         mu = lon/360
         # v / latitude.
         lat = degrees(asin(z))
@@ -306,23 +307,27 @@ class Sphere_Builder:
         
 class Planet_Builder(ShowBase):
     
-    def build_preview_model(self, planet_spec): # name, shiva_str, or recipe.
+
+    def build_low_models(self, planet_spec):
         planet = Planet(planet_spec)
-        planet.pre_model = self.__build_Simple_Model(planet, planet.preview_rec, "preview")
-        planet.pre_model.attachNewNode("planet_label")
-        return planet
-    def build_low_model(self, planet_spec):
-        pass
+        near = planet.radius
+        recs = list(map(lambda lod: lod[0], planet.far_lod)) + [planet.preview_rec]
+        for rec in recs:
+            model_np = self.__build_Simple_Model(planet, rec)
+            if rec == recs[-1]: name="pre"
+            else: name = rec
+            model_np.writeBamFile("{}/{}_{}.bam".format(planet.path, planet.name, name))
+            
     def build_high_model(self, planet_spec):
         pass
     def build_all(self, planet_spec):
         pass
     
 
-    def __build_Simple_Model(self, planet, rec, name):
+    def __build_Simple_Model(self, planet, rec):
         model_path = "{}/sphere_{}t.bam".format(_path.MODELS, rec)
         model_np = loader.loadModel(model_path).getChild(0)
-        model_np.setName("{}_model_{}".format(name, rec))
+        model_np.setName("model_{}".format(rec))
         model = Model(model_np)
         
         # Inflate sphere model to planet radius.
@@ -334,38 +339,38 @@ class Planet_Builder(ShowBase):
         if "height_map" in planet.__dict__:
             self.__map_Topography(planet, model, pts)
         
+        farts = {8:(1,0,0,1),7:(0,1,0,1),4:(0,0,1,1)}
         # Map planet colours.
-        if "colour_map" in planet.__dict__:
-            self.__map_Preview_Colours(planet, model)
+        if "colour_map" in planet.__dict__ and rec != 6:
+            fart_col = farts[rec]
+            self.__map_Colours(planet, model, rec, fart_col)
         
+        model_np.attachNewNode("planet_label")
         return model_np
 
-    def __map_Preview_Colours(self, planet, model, pts=[]):
-        col_map = planet.colour_map
-        if "pre_colour_map" in planet.__dict__:
-            col_map = planet.pre_colour_map
-        col_map_fn = Filename("{}/maps/{}".format(planet.path, col_map))
+    def __map_Colours(self, planet, model, rec, fart_col, pts=[]):
+        col_map_path = planet.colour_map.replace(".","_low.")
+        col_map_fn = Filename("{}/maps/{}".format(planet.path, col_map_path))
         
-        if planet.preview_mode == "detailed":
+        '''if rec >= 6:
             col_map = loader.loadTexture(col_map_fn)
             model.NP.setTexture(col_map)
-        elif planet.preview_mode == "simple":
-            col_map = PNMImage()
-            col_map.read(col_map_fn)
-            _cu_size = col_map.getXSize()-1
-            _cv_size = col_map.getYSize()-1
-           
-            cols = []
-            if not pts: pts = model.read("vertex")
-            for pt in pts:
-                u, v = self.__get_Pt_Uv(pt, _cu_size, _cv_size)
-                r = col_map.getRed(u, v)
-                g = col_map.getGreen(u, v)
-                b = col_map.getBlue(u, v)
-                pt_col = (r, g, b, 1)
-                cols.append(pt_col)
-                    
-            model.modify("color", cols)
+        else:'''
+        col_map = PNMImage()
+        col_map.read(col_map_fn)
+        _cu_size = col_map.getXSize()-1
+        _cv_size = col_map.getYSize()-1
+       
+        cols = []
+        if not pts: pts = model.read("vertex")
+        for pt in pts:
+            u, v = self.__get_Pt_Uv(pt, _cu_size, _cv_size)
+            r = col_map.getRed(u, v)
+            g = col_map.getGreen(u, v)
+            b = col_map.getBlue(u, v)
+            pt_col = (r, g, b, 1)
+            cols.append(fart_col)
+        model.modify("color", cols)
 
     def __map_Topography(self, planet, model, pts=[]):
         height_map = PNMImage()
@@ -470,26 +475,13 @@ class Planet_Builder(ShowBase):
 
 
 class Planet:
-    
-    # Public.
-    def save(self):
-        for i, model in enumerate((self.high_model, self.low_model, self.pre_model)):
-            if model:
-                recipe_np = NodePath(repr(self.recipe))
-                recipe_np.reparentTo(model)
-                model.writeBamFile(self.__paths[i])
 
     # Setup.
     def __init__(self, planet_spec):
         self.recipe = self.__get_Recipe(planet_spec)
         self.__dict__.update(self.recipe)
-        self.high_model = None
-        self.low_model = None
-        self.pre_model = None
         self.path = "{}/{}".format(_path.BODIES, self.name)
-        self.__paths = ["{}/{}.bam".format(self.path, self.name),
-                        "{}/{}_low.bam".format(self.path, self.name),
-                        "{}/{}_pre.bam".format(self.path, self.name)]
+
         
 
     def __get_Recipe(self, planet_spec):

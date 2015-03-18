@@ -34,8 +34,9 @@ STAR_SPECS_DICT = {
 # Body Templates.
 _default = {
     'preview_rec': 6,
-    'preview_mode': "simple",
-    'far_lod':  [(6,400000), (7,160000), (8,0)],
+    'near_horizon': 10,
+    'far_horizon': 1240,
+    'far_lod':  [(8,20),(7,100),(4,400)],
     'near_lod': [(.04,15,16), (.08,11,12), (.16,7,8), (.32,5,6), (.64,3,4), (1.28,1,2), (2.56,0,2)],
     'tex_lod':  [(0,100,12), (50,250,6), (175,575,3), (400,1200,1)],
     'tess_lod': [(.25,1), (.5,2), (1,4), (2,8)]
@@ -202,6 +203,7 @@ class Shiva_Compiler:
                         new_block.update(STAR_SPECS_DICT[star_cls])
                         new_block['name'] = star_name.lower()
                         new_block['type'] = "star"
+                        new_block['far_horizon'] = 10000
                     elif tokens[0] == "planet" or tokens[0] == "moon":
                         body_name = tokens[1].split("(")[0].replace(":", "")
                         body_path = "{}/{}/{}.shv".format(_path.BODIES, body_name, body_name)

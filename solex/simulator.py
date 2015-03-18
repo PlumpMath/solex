@@ -3,7 +3,8 @@
 # ====================
 
 # System imports.
-from multiprocessing import Process, Value, Lock, cpu_count
+from multiprocessing import Process, Value 
+from math import sqrt
 
 # Panda3d.
 from panda3d.core import Filename, ClockObject
@@ -18,6 +19,7 @@ class Simulator:
     
     # Public.
     def init_system(self, sys_recipe):
+        self.stop()
         self.sys_recipe = sys_recipe
         self.BODIES = self.__init_Bodies(sys_recipe)
     def start(self, mode="python"):
@@ -51,7 +53,7 @@ class Simulator:
         G = _phys.G
         
         def apply_physics(body, parent, dt):
-            if parent and False: ### 
+            if parent:
                 # Find distance and direction from body to its parent.
                 dir_vec.set(*body['POS']-parent['POS'])
                 dist = dir_vec.length()
@@ -62,15 +64,14 @@ class Simulator:
                 body['delta_vec'] = -dir_vec * F * dt
                 body['VEC'] += body['delta_vec'] + parent['delta_vec']
                 body['POS'] += body['VEC'] * dt
-                
+                if body['name'] == "io": print(dir_vec)
                 # Update self.BODIES.
                 b = self.BODIES[body['name']]
                 pos, vec, hpr, rot = body['POS'], body['VEC'], body['HPR'], body['ROT']
                 b['x'].value, b['y'].value, b['z'].value = pos.x, pos.y, pos.z
-                b['vz'].value, b['vy'].value, b['vz'].value = vec.x, vec.y, vec.z
+                b['vx'].value, b['vy'].value, b['vz'].value = vec.x, vec.y, vec.z
                 b['h'].value, b['p'].value, b['r'].value = hpr.x, hpr.y, hpr.z
                 b['rh'].value, b['rp'].value, b['rr'].value = rot.x, rot.y, rot.z
-                ## print("   ", body['name'], body['POS'])
                 
             for sat in body['bodies']:
                 apply_physics(sat, body, dt)
@@ -80,32 +81,37 @@ class Simulator:
             with sim_throttle:
                 c_time = clock.getRealTime()
                 dt = c_time - p_time
-                ## print()
                 apply_physics(sys_root, None, dt)
-                ## print()
                 p_time = c_time
                     
     def __init_Bodies(self, sys_recipe):
         sys = {}
         
-        def add_body(body, parent_str="", x=0):
+        def add_body(body, p_mass=0, pv=0, x=0):
             x += body['aphelion']
-            sys[body['name']] = {'_prox':body['radius']*1240,
-                                 'x':Value("d", x),
-                                 'y':Value("d", 0.0),
-                                 'z':Value("d", 0.0),
-                                 'vx':Value("f", 0.0),
-                                 'vy':Value("f", 0.0),
-                                 'vz':Value("f", 0.0),
-                                 'h':Value("f", 0.0),
-                                 'p':Value("f", 0.0),
-                                 'r':Value("f", 0.0),
-                                 'rh':Value("f", 0.0),
-                                 'rp':Value("f", 0.0),
-                                 'rr':Value("f", 0.0)}
+            v = 0
+            if x:
+                v = sqrt((_phys.G*(p_mass+body['mass']))*(2/body['aphelion']-1/body['sm_axis']))
+                ## print(body['name'])
+                ## print(v);print()
+                
+            sys[body['name']] = {
+                '_prox':body['radius']*body['far_horizon'],
+                'x':Value("d", x),
+                'y':Value("d", 0.0),
+                'z':Value("d", 0.0),
+                'vx':Value("f", 0.0),
+                'vy':Value("f", v+pv),
+                'vz':Value("f", 0.0),
+                'h':Value("f", 0.0),
+                'p':Value("f", 0.0),
+                'r':Value("f", 0.0),
+                'rh':Value("f", 0.0),
+                'rp':Value("f", 0.0),
+                'rr':Value("f", 0.0)}
                               
             for sat in body['sats']:
-                add_body(sat, body['name'], x)
+                add_body(sat, body['mass'], v, x)
             x -= body['aphelion']
             
         add_body(sys_recipe)
@@ -113,18 +119,21 @@ class Simulator:
 
     def __init_Sim_System(self, sys_recipe):
         
-        def add_body(body, x=0):
+        def add_body(body, p_mass=0, pv=0, x=0):
             x += body['aphelion']
+            v = 0
+            if x:
+                v = sqrt((_phys.G*(p_mass+body['mass']))*(2/body['aphelion']-1/body['sm_axis']))
             bodies = []
             for sat in body['sats']:
-                bodies.append(add_body(sat, x))
+                bodies.append(add_body(sat, body['mass'], v, x))
             
             body_dict = {'name':body['name'],
                          'mass':body['mass'],
                          'radius':body['radius'],
                          'POS':LVector3d(x,0,0),
+                         'VEC':LVector3d(0,v+pv,0),
                          'HPR':LVector3f(0,0,0),
-                         'VEC':LVector3d(0,0,0),
                          'ROT':LVector3f(0,0,0),
                          'delta_vec':LVector3d(0,0,0),
                          'bodies':bodies}

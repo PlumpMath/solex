@@ -12,7 +12,7 @@ from direct.showbase.ShowBase import ShowBase
 from panda3d.core import ClockObject, Filename
 
 # Local.
-from etc.settings import _path, _sim
+from etc.settings import _path, _sim, _net
 from etc.shiva import Shiva_Compiler as SC
 from etc.util import Throttle
 from gui.ueh import Default_UEH
@@ -26,9 +26,10 @@ class Client(ShowBase):
     # Public.
     def init_system(self, sys_name):
         if self.SYS and self.SYS.name == sys_name: return
+        self.SIM.stop()
         sys_recipe = self.sys_recipes[sys_name]
-        self.SYS = self.__init_Sys(sys_recipe)
         self.SIM.init_system(sys_recipe)
+        self.SYS = self.__init_Sys(sys_recipe)
         self.PRE_VIEW.on_sys_init(self.SYS)
         self.ENV.on_sys_init(self.SYS)
         self.SIM.start()
@@ -79,7 +80,7 @@ class Client(ShowBase):
 
         # Main loop.
         taskMgr.add(self._main_loop_, "main_loop", appendTask=True, sort=0)  # <-
-        taskMgr.doMethodLater(1/_sim.HZ, self._state_, "state_loop")
+        taskMgr.doMethodLater(1/_net.BROADCAST_HZ, self._state_, "state_loop")
         
     
     def _main_loop_(self, task):
@@ -110,17 +111,16 @@ class Client(ShowBase):
                 obj.sys_vec.set(*obj_state['sys_vec'])
                 obj.sys_hpr.set(*obj_state['sys_hpr'])
                 obj.sys_rot.set(*obj_state['sys_rot'])
-                print(obj_id, obj.sys_pos, obj.MODEL_NP.getPos(render))
                 if obj_id not in live_ids:
                     self.ENV.add_object(obj_id, obj)
                 else:
                     live_ids.remove(obj_id)
-            print()
             # Remove superfluous objects.
             for obj_id in live_ids:
                 obj = self.SYS.OBJECT_DICT[obj_id]
-                self.ENV.remove_object(obj_id, obj)
-                
+                if obj not in self.SYS.STARS:
+                    self.ENV.remove_object(obj_id, obj)
+        live_ids = []  
         return task.again
 
     def __refresh_Sys_Recipes(self):

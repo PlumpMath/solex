@@ -65,6 +65,7 @@ class Pre_View:
     def to_env(self, focus_id):
         self.client.switch_display(self.client.ENV)
         self.client.ENV.set_focus(focus_id)
+        self.NP.stash()
     
     # Setup.
     def __init__(self, client):
@@ -160,25 +161,26 @@ class Environment:
                
     # Public.
     def on_sys_init(self, sys):
-        ## self.GUI.update(sys)
+        self.LIVE_OBJECTS = {}
+        self.live_object_ids = set()
         self.star_sphere_np = self.__build_Star_Sphere(sys.bg_stars)
-        for star in sys.STARS: self.set_focus(star.name)
     def to_pre_view(self):
         self.client.switch_display(self.client.PRE_VIEW)
     def set_focus(self, focus_id):
         obj = self.client.SYS.OBJECT_DICT[focus_id]
+        self.GUI.set_widget_text("env_win.focus_banner", obj.name.title())
         if focus_id not in self.live_object_ids:
             self.add_object(focus_id, obj)
         self.CAMERA.set_focus(obj)
     def add_object(self, obj_id, obj):
-        obj.load_low_model()
+        obj.load()
         self.live_object_ids.add(obj_id)
         self.LIVE_OBJECTS[obj_id] = obj
         obj.MODEL_NP.reparentTo(self.NP)
     def remove_object(self, obj_id, obj):
         self.live_object_ids.remove(obj_id)
         self.LIVE_OBJECTS.pop(obj_id)
-        obj.MODEL_NP.detachNode()
+        obj.unload()
     
     # Setup.
     def __init__(self ,client):
@@ -188,10 +190,10 @@ class Environment:
         self.NP.hide()
         self.GUI = Env_Win(ctrl=self)
         self.GUI.render()
+        self.GUI.NP.hide()
         self.star_sphere_np = NodePath("dummy")
-        self.live_object_ids = set()
         self.LIVE_OBJECTS = {}
-        self.__stars = []
+        self.live_object_ids = set()
         
         self.CAMERA = Orbital_Camera(self)
         self.current_cam_type = "orbital"
@@ -205,20 +207,17 @@ class Environment:
         # User events.
         self._handle_user_events_(ue, dt)
         self.CAMERA._handle_user_events_(ue, dt)
-        
+        ## print(dt)
         # System State.
         light_vec = self.client.SYS.STARS[0].MODEL_NP.getPos()
         light_vec.normalize()
         cam = self.CAMERA
         for obj_id, obj in self.LIVE_OBJECTS.items():
-            
-            obj_pos = obj.sys_pos - cam.sys_pos
-            obj._update_(ue, dt, obj, obj_pos)
+            obj._update_(ue, dt, cam)
             obj.MODEL_NP.setShaderInput("light_dir", light_vec)
-            '''print(obj_id, obj.sys_pos)
-        print()'''
+        # Gui.
+        self.GUI._main_loop_(ue, dt)
 
-        
     def _handle_user_events_(self, ue, dt):
         cmds = ue.get_cmds(self)
         if "change_cam" in cmds:

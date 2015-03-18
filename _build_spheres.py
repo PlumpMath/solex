@@ -2,7 +2,7 @@
 # Solex - _build_spheres.py
 # =========================
 
-RECS = 7
+RECS = 8
 MODE = "tris"  # 'tris' or 'patches'.
 
 if __name__ == "__main__":
