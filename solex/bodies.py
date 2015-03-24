@@ -4,16 +4,17 @@
 
 # System.
 from random import random
-from math import sin, cos, acos
+from math import sin, cos, asin, acos, degrees
 
 # Panda3d.
-from panda3d.core import NodePath, Filename
-from panda3d.core import LVector3f, LVector3d, LPoint3f
+from panda3d.core import NodePath, Filename, TransparencyAttrib ## 
+from panda3d.core import LVector3f, LVector3d, LPoint3f, LVector4f
 
 # Local.
 from etc.settings import _path, _env
 from etc.util import TimeIt
 from planet_gen.model import Model
+from solex.shader import Shader_Manager as SM
 
 
 
@@ -66,7 +67,7 @@ class _Body_:
         self._loaded = False
     
     def _gen_Sphere_Model(self, colour=[]):
-        model_path = "{}/sphere_5t.bam".format(_path.MODELS)
+        model_path = "{}/sphere_low_5.bam".format(_path.MODELS)
         model_np = loader.loadModel(model_path).getChild(0)
         model_np.setName("{}_pre_model".format(self.name))
         model = Model(model_np)
@@ -83,7 +84,6 @@ class _Body_:
         model.modify("color", cols)
         
         return model_np
-
 
 
 class Star(_Body_):
@@ -134,44 +134,36 @@ class Planet(_Body_):
     
     # Public.
     def load_preview_model(self):
-        model_file = Filename("{}/{}_pre.bam".format(self.path, self.name))
+        p_str = "{}/{}_{}_{}.bam".format(self.path, self.name, self.preview_type, self.preview_rec)
+        model_file = Filename(p_str)
         self.pre_model_np = loader.loadModel(model_file).getChildren()[0]
+        SM.set_planet_shaders(self, self.pre_model_np, self.preview_type)
+        self.pre_model_np.setShaderInput("light_vec", LVector3f(-1,0,0))
+        self.pre_model_np.setShaderInput("atmos_vals", LVector4f(0,0,0,0))
+        self.pre_model_np.setShaderInput("body_dir", LVector3f(0,1,0)) ### 
         return self.pre_model_np
     def load(self):
         self.__load_Models()
-    def show_model(self, index):
-        if not self.current_model_np.isStashed():
+    def show_model(self, near):
+        if self.current_model_np:
             self.current_model_np.stash()
-        self.current_model_np = self.__models[index]
+        self.current_model_np = self.__models[near]
         self.current_model_np.unstash()
-        self.__lod_index = index
+        self.__c_near = near
     def unload(self):
-        self.MODEL_NP.removeNode()
-        self.MODEL_NP = NodePath("model")
-    
-    # Callbacks.
-    def _on_load_model(self, model_np, index):
-        model_np.stashTo(self.MODEL_NP)
-        self.__models[index] = model_np
-        self.current_model_np = model_np
-        if len(self.__models) == len(self.__lod_list):
-            self.current_model_np.unstash()
-            self._loaded = True
-            self.__lod_count = len(self.__models)
-            self.__lod_index = self.__lod_count-1
-    
-    # Setup.    
+        for model_np in list(self.__models.values()):
+            model_np.removeNode()
+        self.__Reset()  
+
+    # Setup.
     def __init__(self, recipe):
         _Body_.__init__(self, recipe)
         self.path = "{}/{}".format(_path.BODIES, self.name)
         self.MODEL_NP = NodePath("model")
-        self.current_model_np = None
-        self.__models = {}
-        self.__lod_index = -1
-        self.__lod_list = []
-        self.__lod_count = 0
+        self.MODEL_NP.setShaderInput("atmos_vals", LVector4f(0,0,0,0))
+        self.__Reset()
         
-
+        
     def _update_(self, ue, dt, cam, far_radius=_env.ATMOS_RADIUS):
         if not self._loaded: return
         body_pos = self.sys_pos - cam.sys_pos
@@ -192,53 +184,56 @@ class Planet(_Body_):
             self._mode = "near"
             
         # Switch model LOD.
-        c_near, c_far = self.__lod_list[self.__lod_index]
-        if dist_from_cam < c_near:
-            i = self.__lod_index - 1
-            while i >= 0:
-                near, far = self.__lod_list[i]
-                if dist_from_cam >= near and dist_from_cam < far:
-                    self.show_model(i)
-                    break
-                i -= 1
-        elif dist_from_cam > c_far:
-            i = self.__lod_index + 1
-            while i < self.__lod_count:
-                near, far = self.__lod_list[i]
-                if dist_from_cam >= near and dist_from_cam < far:
-                    self.show_model(i)
-                    break
-                i += 1
-        
+        for near, far in self.__lod_list:
+            if dist_from_cam >= near and dist_from_cam < far:
+                if near != self.__c_near:
+                    self.show_model(near)
+                break
+
+        # State.
         self.MODEL_NP.setPos(*body_pos)
         self.sys_pos += (self.sys_vec*dt)
         
-        
-        
-        '''if dist_from_cam < far_radius:
+        # Shader updates.
+        if dist_from_cam < far_radius:
             cull_dist = dist_from_cam**2 - self.radius**2
-            self.LOD_NP.setShaderInput("cull_dist", cull_dist)'''
+            self.MODEL_NP.setShaderInput("cull_dist", cull_dist)
+        if "atmos_ceiling" in self.__dict__:
+            atmos_vals = LVector4f(dist_from_cam, dist_from_cam-self.radius,
+                                   abs(degrees(asin(self.radius/dist_from_cam))),
+                                   abs(degrees(asin(min((self.radius+self.atmos_ceiling)/dist_from_cam,1)))))
+            self.MODEL_NP.setShaderInput("atmos_vals", atmos_vals)
+            body_pos.normalize()
+            self.MODEL_NP.setShaderInput("body_dir", LVector3f(*body_pos))
         
-        
+
     def __load_Models(self):
-        # High model.
-        near = 0
-        i = 0
-        high_model_file = Filename("{}/{}.bam".format(self.path, self.name))
-        if high_model_file.exists():
-            loader.loadModel(high_model_file, callback=self._on_load_model, extraArgs=[i])
-            self.__lod_count += 1
-            self.__lod_list.append((0,self.near_horizon*self.radius))
-            near = self.near_horizon
-            i = 1
-            
-        # Low models.
-        for rec, far in self.far_lod:
-            model_file = Filename("{}/{}_{}.bam".format(self.path, self.name, rec))
-            loader.loadModel(model_file, callback=self._on_load_model, extraArgs=[i])
-            self.__lod_list.append((near*self.radius,far*self.radius))
-            near = far
-            i += 1
+        
+        # Async callback.
+        def _on_load_model(model_np, near, model_type):
+            model_np = model_np.getChildren()[0]
+            ## model_np.setAttrib(TransparencyAttrib.make(TransparencyAttrib.MAlpha))  ## 
+            model_np.stashTo(self.MODEL_NP)
+            self.__models[near] = model_np
+            SM.set_planet_shaders(self, model_np, model_type)
+            if len(self.__models) == len(self.lod):
+                self.show_model(near)
+                self._loaded = True
+        
+        # Async load each model given by 'lod_models'.
+        far = self.far_horizon * self.radius
+        for mod_type, (near, rec) in reversed(list(zip(self.lod_models, self.lod))):
+            near *= self.radius
+            model_file = Filename("{}/{}_{}_{}.bam".format(self.path, self.name, mod_type, rec))
+            loader.loadModel(model_file, callback=_on_load_model, extraArgs=[near, mod_type])
+            self.__lod_list.append((near,far))
+            far = near
+
+    def __Reset(self):
+        self.current_model_np = None
+        self.__models = {}
+        self.__lod_list = []
+        self.__c_near = None
 
 
 

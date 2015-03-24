@@ -22,21 +22,20 @@ class _path:
 # Physical constants.
 class _phys:
     OBJ_SCALE = 0.001                   # 1 km = 1 m.
-    TIME_SCALE = 0.06                   # 1 hour = 1 minute.
-    FORCE_SCALE = 0.02                  # Obj force scale.
-    G = (6.67384*10**-11)*OBJ_SCALE # Scaled gravitaional constant.
+    TIME_SCALE = 1/60                   # 1 hour = 1 minute.
+    G = (6.67384*10**-11)*OBJ_SCALE*TIME_SCALE # Scaled gravitaional constant.
 
 # Environment.
 class _env:
     STAR_COUNT = 15000
     STAR_RADIUS = 889999
     ATMOS_RADIUS = 880000
-    AMBIENT_FACTOR = 0.001
+    AMBIENT = 0.02
 
 # Simulator.
 class _sim:
     MAX_LOCAL_BODIES = 1000
-    HZ = 60
+    HZ = 600
 
 # Camera.
 class _cam:

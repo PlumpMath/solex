@@ -414,7 +414,7 @@ class Env_Win(_Window_):
 
 
     def _update_(self, ue, dt):
-        focus_dist = str(round(self.CTRL.client.ENV.CAMERA.focus_dist, 2))
+        focus_dist = str(round(self.CTRL.client.ENV.CAMERA.focus_pos.length(), 2))
         ## print(focus_dist)
         self.c_dict['env_win.focus_dist'].set_text(focus_dist)
 

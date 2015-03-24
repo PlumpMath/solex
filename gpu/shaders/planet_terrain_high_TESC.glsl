@@ -1,5 +1,12 @@
 #version 440
 
+// Uniform.
+uniform mat4 p3d_ModelViewMatrix;
+uniform mat3 p3d_NormalMatrix;
+uniform float cull_dist;
+uniform ivec3 geom_lod[8];
+uniform vec2 tess_lod[4];
+
 // In.
 in vec3 verts[];
 in vec2 map_uvs[];
@@ -14,13 +21,6 @@ out vec3 tc_verts[];
 out vec2 tc_map_uvs[];
 out vec2 tc_tex_uvs[];
 out int tc_ter_inds[];
-
-// Uniform.
-uniform mat4 p3d_ModelViewMatrix;
-uniform mat3 p3d_NormalMatrix;
-uniform float cull_dist;
-uniform ivec3 geom_lod[8];
-uniform vec2 tess_lod[4];
 
 
 // Main.

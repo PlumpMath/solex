@@ -21,18 +21,20 @@ from etc.settings import _path
 
 class TimeIt:
     
-    def __init__(self, msg):
-        self.msg = msg
-        self.clock = ClockObject()
+    def __init__(self, msg="", rnd=3):
+        self._msg = msg
+        self._rnd = rnd
+        self._clock = ClockObject()
     def __enter__(self):
-        self.start_dt = self.clock.getRealTime()
+        self._start_dt = self._clock.getRealTime()
         return self
     def __exit__(self, *e_info):
-        dur = self.clock.getRealTime()-self.start_dt
-        print("{}:  {}".format(self.msg, round(dur, 3)))
-        for attr in self.__dict__:
-            if attr in ("msg", "clock", "start_dt"): continue
-            print("  {}:  {}".format(attr, self.__dict__[attr]))
+        self._dur = self._clock.getRealTime()-self._start_dt
+        if self._msg:
+            print("{}:  {}".format(self._msg, round(self._dur, self._rnd)))
+            for attr in self.__dict__:
+                if attr.startswith("_"): continue
+                print("  {}:  {}".format(attr, self.__dict__[attr]))
 
 # Loop throttle.
 class Throttle:

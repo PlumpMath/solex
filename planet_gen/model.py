@@ -13,7 +13,7 @@ from panda3d.core import GeomVertexData, GeomVertexFormat, GeomVertexArrayFormat
 from panda3d.core import Geom, GeomNode, GeomTriangles, GeomPatches
 from panda3d.core import NodePath, LODNode, Texture, TextureStage, InternalName
 from panda3d.core import LVector2f, LVector3f, LVector3i, LVector4f, LPoint3f, PTA_LVecBase2f
-from panda3d.core import PNMImage, Filename
+from panda3d.core import PNMImage, Filename, CullFaceAttrib, TransparencyAttrib
 
 # Local imports.
 from etc.settings import _path
@@ -100,13 +100,17 @@ class Hexasphere:
 
 class Sphere_Builder:
     
+    simp_range = (3,4,5,6,7,8)
+    low_range = (3,4,5,6)
+    mid_range = (5,6,7,8)
+    high_range = (6,7,8)
+    
     def build_spheres(self):
         self.__build_Spheres()
     
-    def __init__(self, recs, mode):
+    def __init__(self, recs):
         self.RECS = recs
-        self.mode = mode
-        self.__generate_Vformats()
+        self.__vformat = self.__generate_Vformats()
         
     
     def __build_Spheres(self):
@@ -120,20 +124,22 @@ class Sphere_Builder:
             if rec > 0:
                 with TimeIt("Recursion {}".format(rec)):
                     sphere = self.__recurse_Sphere(sphere)
-            
-            name = "sphere_{}".format(rec)
-            with TimeIt("Build {}".format(name)):
-                if self.mode == "tris":
-                    sphere_np = self.__build_Tris(sphere)
-                    sphere_path = "{}/{}t.bam".format(_path.MODELS, name)
-                elif self.mode == "patches":
+                    
+            with TimeIt("  tri"):
+                for m_type in ("simp", "low", "mid"):
+                    if rec in self.__class__.__dict__["{}_range".format(m_type)]:
+                        sphere_path = "{}/sphere_{}_{}.bam".format(_path.MODELS, m_type, rec)
+                        sphere_np = self.__build_Tris(sphere, m_type)
+                        sphere_np.writeBamFile(sphere_path)
+
+            with TimeIt("  patch"):
+                if rec in self.high_range:
+                    sphere_path = "{}/sphere_high_{}.bam".format(_path.MODELS, rec)
                     sphere_np = self.__build_Patches(sphere)
-                    sphere_path = "{}/{}.bam".format(_path.MODELS, name)
-                sphere_np.setName(name)
-                sphere_np.writeBamFile(sphere_path)
+                    sphere_np.writeBamFile(sphere_path)
                 
-            print(" pts:  {}".format(len(sphere.pts)))
-            print(" tris: {}".format(len(sphere.tris)))
+            print("pts:  {}".format(len(sphere.pts)))
+            print("tris: {}".format(len(sphere.tris)))
             print()
 
     def __recurse_Sphere(self, sphere):
@@ -197,30 +203,24 @@ class Sphere_Builder:
         
         return new_sphere
 
-    def __build_Tris(self, sphere):
-        vdata = GeomVertexData("Data", self.__tris_vformat, Geom.UHStatic)
-        vertices = GeomVertexWriter(vdata, "vertex")
-        ## colors = GeomVertexWriter(vdata, "color")
-        normals = GeomVertexWriter(vdata, "normal")
-        mapcoords = GeomVertexWriter(vdata, "texcoord")
-        
+    def __build_Tris(self, sphere, mode):
+        vdata = GeomVertexData("Data", self.__vformat[mode], Geom.UHStatic)
         _num_rows = len(sphere.pts)
+         
+        # Vertices.
+        vertices = GeomVertexWriter(vdata, "vertex")
         vertices.reserveNumRows(_num_rows)
-        ## colors.reserveNumRows(_num_rows)
-        normals.reserveNumRows(_num_rows)
-        mapcoords.reserveNumRows(_num_rows)
-        
-        # Pts.
-        norm_vec = LVector3f(0,0,0)
-        for pt, mc in zip(sphere.pts, sphere.coords):
+        for pt in sphere.pts:
             vertices.addData3f(*pt)
-            ## colors.addData4f(.1,.1,.1,0)
-            norm_vec.set(*pt)
-            norm_vec.normalize()
-            normals.addData3f(*norm_vec)
-            u, v = mc[:2]
-            mapcoords.addData2f(u,v)
         
+        # Map coords.
+        if mode == "mid":
+            mapcoords = GeomVertexWriter(vdata, "mapcoord")
+            mapcoords.reserveNumRows(_num_rows)
+            for mc in sphere.coords:
+                u, v = mc[:2]
+                mapcoords.addData2f(u,v)
+            
         # Tris.
         prim = GeomTriangles(Geom.UHStatic)
         prim.reserveNumVertices(len(sphere.tris))
@@ -237,7 +237,7 @@ class Sphere_Builder:
         return geom_np
 
     def __build_Patches(self, sphere):
-        vdata = GeomVertexData("Data", self.__patches_vformat, Geom.UHStatic)
+        vdata = GeomVertexData("Data", self.__vformat['high'], Geom.UHStatic)
         vertices = GeomVertexWriter(vdata, "vertex")
         mapcoords = GeomVertexWriter(vdata, "mapcoord")
         texcoords = GeomVertexWriter(vdata, "texcoord")
@@ -286,95 +286,94 @@ class Sphere_Builder:
         return mu, mv
 
     def __generate_Vformats(self):
-        # Tris.
+        vformat_dict = {}
+        # Simple.
         array = GeomVertexArrayFormat()
         array.addColumn(InternalName.make("vertex"), 3, Geom.NTFloat32, Geom.CPoint)
-        array.addColumn(InternalName.make("normal"), 3, Geom.NTFloat32, Geom.CVector)
-        array.addColumn(InternalName.make("color"), 4, Geom.NTFloat32, Geom.CColor)
-        array.addColumn(InternalName.make("texcoord"), 2, Geom.NTFloat32, Geom.CTexcoord)
         vformat = GeomVertexFormat()
         vformat.addArray(array)
-        self.__tris_vformat = GeomVertexFormat.registerFormat(vformat)
-        # Patches.
+        vformat_dict['simp'] = GeomVertexFormat.registerFormat(vformat)
+        # Low.
+        array = GeomVertexArrayFormat()
+        array.addColumn(InternalName.make("vertex"), 3, Geom.NTFloat32, Geom.CPoint)
+        array.addColumn(InternalName.make("color"), 4, Geom.NTFloat32, Geom.CColor)
+        vformat = GeomVertexFormat()
+        vformat.addArray(array)
+        vformat_dict['low'] = GeomVertexFormat.registerFormat(vformat)
+        # Mid.
+        array = GeomVertexArrayFormat()
+        array.addColumn(InternalName.make("vertex"), 3, Geom.NTFloat32, Geom.CPoint)
+        array.addColumn(InternalName.make("mapcoord"), 2, Geom.NTFloat32, Geom.CTexcoord)
+        vformat = GeomVertexFormat()
+        vformat.addArray(array)
+        vformat_dict['mid'] = GeomVertexFormat.registerFormat(vformat)
+        # High (patches).
         array = GeomVertexArrayFormat()
         array.addColumn(InternalName.make("vertex"), 3, Geom.NTFloat32, Geom.CPoint)
         array.addColumn(InternalName.make("mapcoord"), 2, Geom.NTFloat32, Geom.CTexcoord)
         array.addColumn(InternalName.make("texcoord"), 2, Geom.NTFloat32, Geom.CTexcoord)
         vformat = GeomVertexFormat()
         vformat.addArray(array)
-        self.__patches_vformat = GeomVertexFormat.registerFormat(vformat)
+        vformat_dict['high'] = GeomVertexFormat.registerFormat(vformat)
+        return vformat_dict
 
         
 class Planet_Builder(ShowBase):
     
-
-    def build_low_models(self, planet_spec):
+    def build_models(self, planet_spec):
         planet = Planet(planet_spec)
         near = planet.radius
-        recs = list(map(lambda lod: lod[0], planet.far_lod)) + [planet.preview_rec]
-        for rec in recs:
-            model_np = self.__build_Simple_Model(planet, rec)
-            if rec == recs[-1]: name="pre"
-            else: name = rec
-            model_np.writeBamFile("{}/{}_{}.bam".format(planet.path, planet.name, name))
+        recs = list(map(lambda lod: lod[1], planet.lod)) + [planet.preview_rec]
+        model_types = planet.lod_models + [planet.preview_type]
+        for rec, model_type in zip(recs, model_types):
+            model_np = self.__build_Model(planet, model_type, rec)
+            model_np.writeBamFile("{}/{}_{}_{}.bam".format(planet.path, planet.name, model_type, rec))
             
-    def build_high_model(self, planet_spec):
-        pass
-    def build_all(self, planet_spec):
-        pass
     
 
-    def __build_Simple_Model(self, planet, rec):
-        model_path = "{}/sphere_{}t.bam".format(_path.MODELS, rec)
-        model_np = loader.loadModel(model_path).getChild(0)
-        model_np.setName("model_{}".format(rec))
+    def __build_Model(self, planet, model_type, rec):
+        model_np = NodePath("model_{}".format(rec))
+        
+        # Basic terrain model.
+        ter_model, pts = self.__get_Sphere_Model(model_type, rec, planet.radius, "terrain")
+        ter_model.NP.reparentTo(model_np)
+
+        # Map planet topography.
+        if "height_map" in planet.__dict__ and model_type in ("mid", "high"):
+            self.__map_Topography(planet, ter_model, pts)
+        
+        # Map planet colours for low type models only.
+        if model_type == "low" and "colour_map" in planet.__dict__:
+            self.__map_Colours(planet, ter_model, rec, pts)
+        
+        # Atmosphere.
+        if "atmos_ceiling" in planet.__dict__:
+            a_radius = planet.radius + planet.atmos_ceiling
+            am_type = model_type if model_type != "high" else "mid"
+            atmos_model, a_pts = self.__get_Sphere_Model(am_type, min(rec,7), a_radius, "atmos")
+            atmos_model.NP.setAttrib(CullFaceAttrib.make(CullFaceAttrib.MCullCounterClockwise))
+            atmos_model.NP.setAttrib(TransparencyAttrib.make(TransparencyAttrib.MAlpha))
+            atmos_model.NP.reparentTo(model_np)
+            
+        model_np.attachNewNode("planet_label")
+        return model_np
+
+    def __get_Sphere_Model(self, model_type, rec, radius, name):
+        # Basic terrain model.
+        sphere_path = "{}/sphere_{}_{}.bam".format(_path.MODELS, model_type, rec)
+        model_np = loader.loadModel(sphere_path).getChild(0)
+        model_np.setName(name)
         model = Model(model_np)
         
         # Inflate sphere model to planet radius.
         pts = model.read("vertex")
-        pts = list(map(lambda pt: pt*planet.radius, pts))
+        pts = list(map(lambda pt: pt*radius, pts))
         model.modify("vertex", pts)
+        return model, pts
         
-        # Map planet topography.
-        if "height_map" in planet.__dict__:
-            self.__map_Topography(planet, model, pts)
-        
-        farts = {8:(1,0,0,1),7:(0,1,0,1),4:(0,0,1,1)}
-        # Map planet colours.
-        if "colour_map" in planet.__dict__ and rec != 6:
-            fart_col = farts[rec]
-            self.__map_Colours(planet, model, rec, fart_col)
-        
-        model_np.attachNewNode("planet_label")
-        return model_np
-
-    def __map_Colours(self, planet, model, rec, fart_col, pts=[]):
-        col_map_path = planet.colour_map.replace(".","_low.")
-        col_map_fn = Filename("{}/maps/{}".format(planet.path, col_map_path))
-        
-        '''if rec >= 6:
-            col_map = loader.loadTexture(col_map_fn)
-            model.NP.setTexture(col_map)
-        else:'''
-        col_map = PNMImage()
-        col_map.read(col_map_fn)
-        _cu_size = col_map.getXSize()-1
-        _cv_size = col_map.getYSize()-1
-       
-        cols = []
-        if not pts: pts = model.read("vertex")
-        for pt in pts:
-            u, v = self.__get_Pt_Uv(pt, _cu_size, _cv_size)
-            r = col_map.getRed(u, v)
-            g = col_map.getGreen(u, v)
-            b = col_map.getBlue(u, v)
-            pt_col = (r, g, b, 1)
-            cols.append(fart_col)
-        model.modify("color", cols)
-
     def __map_Topography(self, planet, model, pts=[]):
         height_map = PNMImage()
-        height_map_path = "{}/maps/{}".format(planet.path, planet.colour_map)
+        height_map_path = "{}/maps/{}".format(planet.path, planet.height_map)
         height_map.read(Filename(height_map_path))
         _hu_size = height_map.getXSize()-1
         _hv_size = height_map.getYSize()-1
@@ -386,9 +385,7 @@ class Planet_Builder(ShowBase):
         if _has_sea:
             sea_level = planet.sea_level + planet.radius
         
-        if not pts:
-            pts = model.read("vertex")
-            
+        if not pts: pts = model.read("vertex")
         for pt in pts:
             u, v = self.__get_Pt_Uv(pt, _hu_size, _hv_size)
             height_val = height_map.getGray(u, v)  ## watch when extending w colours.
@@ -406,6 +403,25 @@ class Planet_Builder(ShowBase):
         model.modify("vertex", pts)
         ## self.__set_Normals(model)
                 
+    def __map_Colours(self, planet, model, rec, pts=[]):
+        col_map_path = planet.colour_map.replace(".","_low.")
+        col_map_fn = Filename("{}/maps/{}".format(planet.path, col_map_path))
+        col_map = PNMImage()
+        col_map.read(col_map_fn)
+        _cu_size = col_map.getXSize()-1
+        _cv_size = col_map.getYSize()-1
+       
+        cols = []
+        if not pts: pts = model.read("vertex")
+        for pt in pts:
+            u, v = self.__get_Pt_Uv(pt, _cu_size, _cv_size)
+            r = col_map.getRed(u, v)
+            g = col_map.getGreen(u, v)
+            b = col_map.getBlue(u, v)
+            pt_col = (r, g, b, 1)
+            cols.append(pt_col)
+        model.modify("color", cols)
+
     def __get_Pt_Uv(self, pt, u_size, v_size, z_norm=LVector3f(), ref_vec=LVector3f(0,-1,0)):
         x, y, z = pt
         z_norm.set(*pt)
@@ -506,11 +522,13 @@ class Planet:
 class Model:
     get_dict = {
         'vertex':(GeomVertexReader.getData3f, LPoint3f),
+        'normal':(GeomVertexReader.getData3f, LVector3f),
         'color':(GeomVertexReader.getData4f, LVector4f),
         'mapcoord':(GeomVertexReader.getData2f, LVector2f),
         'texcoord':(GeomVertexReader.getData2f, LVector2f)}
     set_dict = {
         'vertex':GeomVertexWriter.setData3f,
+        'normal':GeomVertexWriter.setData3f,
         'color':GeomVertexWriter.setData4f,
         'mapcoord':GeomVertexWriter.setData2f,
         'texcoord':GeomVertexWriter.setData2f}

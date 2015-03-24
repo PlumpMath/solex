@@ -51,7 +51,6 @@ class Client(ShowBase):
         self.Clock = ClockObject.getGlobalClock()
         self._alive = True
         self._connected = False
-        self._prev_t = 0
         self._display_region = self.cam.getNode(0).getDisplayRegion(0)
     
         # Main menu and environment.
@@ -85,16 +84,13 @@ class Client(ShowBase):
     
     def _main_loop_(self, task):
         # Get 'dt' - time lapsed since last frame.
-        new_t = self.Clock.getRealTime()
-        dt = new_t - self._prev_t
-        
+        dt = self.Clock.getDt()
         # User events.
         ue = self.UEH._get_events_()  # <-
         self._handle_user_events_(ue, dt)  # <-
         
         # Main loops.
         self.DISPLAY._main_loop_(ue, dt)  # <-
-        self._prev_t = new_t
         
         if self._alive: return task.cont
         else: self._exit()
@@ -111,6 +107,9 @@ class Client(ShowBase):
                 obj.sys_vec.set(*obj_state['sys_vec'])
                 obj.sys_hpr.set(*obj_state['sys_hpr'])
                 obj.sys_rot.set(*obj_state['sys_rot'])
+                '''if obj_id == "io":
+                    print((obj.sys_pos-self.__prev_pos).length())
+                    self.__prev_pos = LVector3d(*obj.sys_pos)'''
                 if obj_id not in live_ids:
                     self.ENV.add_object(obj_id, obj)
                 else:
@@ -164,10 +163,10 @@ class Client(ShowBase):
     def __switch_Display(self, display):
         self.DISPLAY.NP.hide()
         self.DISPLAY.GUI.NP.hide()
-        self.DISPLAY.CAMERA.cam_node.setActive(False)
+        ## self.DISPLAY.CAMERA.cam_node.setActive(False)
         display.NP.show()
         display.GUI.NP.show()
-        display.CAMERA.cam_node.setActive(True)
+        ## display.CAMERA.cam_node.setActive(True)
         self._display_region.setCamera(display.CAMERA.NP)
         self.DISPLAY = display
 

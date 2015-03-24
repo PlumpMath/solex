@@ -5,7 +5,7 @@
 # System.
 
 # Panda3d.
-from panda3d.core import NodePath, Filename, DirectionalLight
+from panda3d.core import NodePath, Filename ##  DirectionalLight
 
 # Local.
 from etc.settings import _path, _sys, _env
@@ -83,11 +83,11 @@ class Pre_View:
         self.GUI.NP.hide()
         self.CAMERA = Preview_Camera(self)  # <-
         
-        light = DirectionalLight("pre_view")
+        '''light = DirectionalLight("pre_view")
         light.setColor((1, 1, 1, 1))
         dlnp = self.BODY_NP.attachNewNode(light)
         dlnp.setHpr(-90, 0, 0)
-        self.BODY_NP.setLight(dlnp)
+        self.BODY_NP.setLight(dlnp)'''
 
 
     def _main_loop_(self, ue, dt):
@@ -116,8 +116,6 @@ class Pre_View:
             else:
                 preview_model.reparentTo(self.BODY_NP)
                 preview_model.setScale(.01)
-                if "pre_colour_map" in body.__dict__:
-                    preview_model.setHpr(180,0,0)
                 self.GUI.add_planet_label(body, mode)
             self.__models.append(preview_model)
                 
@@ -171,7 +169,17 @@ class Environment:
         self.GUI.set_widget_text("env_win.focus_banner", obj.name.title())
         if focus_id not in self.live_object_ids:
             self.add_object(focus_id, obj)
-        self.CAMERA.set_focus(obj)
+        for cam in self.cam_list:
+            cam.set_focus(obj)
+    def change_camera(self):
+        self.cam_list.reverse()
+        cam = self.cam_list[0]
+        old_cam = self.CAMERA
+        cam.sys_pos = self.CAMERA.sys_pos
+        cam.focus_pos = self.CAMERA.focus_pos
+        self.CAMERA = cam
+        self.client._display_region.setCamera(self.CAMERA.NP)
+        self.CAMERA.switch_to(old_cam)
     def add_object(self, obj_id, obj):
         obj.load()
         self.live_object_ids.add(obj_id)
@@ -194,10 +202,9 @@ class Environment:
         self.star_sphere_np = NodePath("dummy")
         self.LIVE_OBJECTS = {}
         self.live_object_ids = set()
+        self.cam_list = [Orbital_Camera(self), Surface_Camera(self)]
+        self.CAMERA = self.cam_list[0]
         
-        self.CAMERA = Orbital_Camera(self)
-        self.current_cam_type = "orbital"
-        self.cam_list = ["orbital", "surface"]
         
         
 
@@ -214,7 +221,7 @@ class Environment:
         cam = self.CAMERA
         for obj_id, obj in self.LIVE_OBJECTS.items():
             obj._update_(ue, dt, cam)
-            obj.MODEL_NP.setShaderInput("light_dir", light_vec)
+            obj.MODEL_NP.setShaderInput("light_vec", light_vec)
         # Gui.
         self.GUI._main_loop_(ue, dt)
 

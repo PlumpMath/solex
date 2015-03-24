@@ -4,7 +4,7 @@
 
 # Panda3d imports.
 from panda3d.core import NodePath, Camera
-from panda3d.core import LVector3f, LVector3d, LPoint3f
+from panda3d.core import LVector3f, LVector3d, LPoint3f, LMatrix3d
 
 # Local imports.
 from etc.settings import _cam, _sys
@@ -19,13 +19,10 @@ class _Camera_:
     def set_focus(self, obj):
         if self.FOCUS and obj is self.FOCUS: return
         self.FOCUS = obj
-        self.focus_radius = obj.radius
-        self.radius = self.focus_radius * 12
-        self.focus_pos.set(0, self.radius-obj.radius, 0)
+        self.focus_pos.set(0, obj.radius*12, 0)
         obj_state = self.env.client.SIM.get_object_state(obj.name, ["sys_pos"])
         obj.sys_pos = LVector3d(*obj_state['sys_pos'])
         self.sys_pos = obj.sys_pos - self.focus_pos
-        print(obj.name, obj.sys_pos)
     
     # Setup.
     def __init__(self, env):
@@ -33,6 +30,7 @@ class _Camera_:
         self.cam_node = Camera(self.__class__.__name__.lower())
         self.cam_node.setScene(env.NP)
         self.NP = NodePath(self.cam_node)
+        self.NP.reparentTo(env.NP)
         self.LENS = self.cam_node.getLens()
         self.LENS.setFar(_cam.FAR)
         self.LENS.setFov(base.camLens.getFov())
@@ -40,9 +38,6 @@ class _Camera_:
         
         self.focus_pos = LVector3d(0,0,0)
         self.sys_pos = LVector3d(0,0,0)
-        self.radius = 1
-        self.focus_radius = 1
-        self.focus_dist = 0
     
 
 
@@ -54,9 +49,9 @@ class Orbital_Camera(_Camera_):
                
     zoom_factor = .2
     move_factor = .1
-
     
-    def switch_to(self):
+    
+    def switch_to(self, old_cam):
         self.LENS.setViewHpr(0,0,0)
 
     def _handle_user_events_(self, ue, dt, delta=LVector3f()):
@@ -79,7 +74,6 @@ class Orbital_Camera(_Camera_):
         self.focus_pos += delta
         self.sys_pos = self.FOCUS.sys_pos - self.focus_pos
         self.NP.lookAt(LPoint3f(*self.focus_pos))
-        self.focus_dist = self.focus_pos.length()/self.focus_radius  # gui.
         
 
 class Surface_Camera(_Camera_):
@@ -101,13 +95,17 @@ class Surface_Camera(_Camera_):
     _y_zone = 20  # Width of move y-axis only zone.
     _rot_factor = .001
     _prev_pos = LVector3f(0,0,0)
+
     
-    def switch_to(self):
+    def switch_to(self, old_cam):
         self._prev_pos = LVector3f(*self.focus_pos)
         self._prev_pos.normalize()
+        self.NP.setHpr(old_cam.NP.getHpr(render))
         self.NP.setP(self.NP, 90)
+        self.LENS.setViewHpr(0, 0, 0)
 
     def _handle_user_events_(self, ue, dt, delta=LVector3f()):
+        if not self.FOCUS: return
         delta.set(0,0,0)
         cmds = ue.get_cmds(self)
         
@@ -142,14 +140,14 @@ class Surface_Camera(_Camera_):
             
         # Pitch rotation.
         if "rotate_pitch" in cmds:
-            self._p_val += ue.y_diff * self._rot_factor * 20
-        self.LENS.setViewHpr(0,-self._p_val,0)
+            self._p_val += ue.y_diff * self._rot_factor
+            self.LENS.setViewHpr(0, -self._p_val*20, 0)
         
         # Translate and apply delta.
         mat = self.NP.getTransform(render).getMat()
         trans_delta = LVector3d(*mat.xformVec(delta)) * dt
         self.focus_pos += trans_delta
-        self.sys_pos = self.FOCUS.sys_pos - self.focus_pos
+        self.sys_pos = self.FOCUS.sys_pos - self.focus_pos    
         
         # Correct tilt of camera to stay level with surface.
         delta.normalize()
@@ -166,6 +164,7 @@ class Surface_Camera(_Camera_):
         
 
         
+
 class Preview_Camera(_Camera_):
     
     cmd_map = {'y_move':"_mouse3",
@@ -195,6 +194,7 @@ class Preview_Camera(_Camera_):
 
 
 class Dummy_Camera(_Camera_):
+    
     pass
 
 

@@ -1,15 +1,14 @@
 #version 440
 
+// Uniform.
+uniform sampler2D height_map;
+uniform sampler2D terrain_map;
+uniform vec4 terrain_specs;
+
 // In.
 in vec4 p3d_Vertex;
 in vec2 mapcoord;
 in vec2 texcoord;
-
-// Uniform.
-// uniform float radius;
-uniform sampler2D height_map;
-uniform sampler2D terrain_map;
-uniform vec4 terrain_specs;
 
 // Out.
 out vec3 verts;
@@ -21,7 +20,8 @@ out float heights;      // For TESC shader.
 
 
 // Main.
-void main() {
+void main()
+{
     // Basic vals.
     verts = p3d_Vertex.xyz;
     map_uvs = mapcoord;

@@ -12,7 +12,7 @@ from panda3d.core import LVector3d, LVector3f
 
 # Local.
 from etc.settings import _path, _sim, _phys
-from etc.util import Throttle
+from etc.util import Throttle, TimeIt
 
 
 class Simulator:
@@ -64,7 +64,7 @@ class Simulator:
                 body['delta_vec'] = -dir_vec * F * dt
                 body['VEC'] += body['delta_vec'] + parent['delta_vec']
                 body['POS'] += body['VEC'] * dt
-                if body['name'] == "io": print(dir_vec)
+                
                 # Update self.BODIES.
                 b = self.BODIES[body['name']]
                 pos, vec, hpr, rot = body['POS'], body['VEC'], body['HPR'], body['ROT']
@@ -77,12 +77,15 @@ class Simulator:
                 apply_physics(sat, body, dt)
 
         p_time = 0
+        dt = 0
         while alive.value:
             with sim_throttle:
+                ## with TimeIt() as tt:
                 c_time = clock.getRealTime()
                 dt = c_time - p_time
                 apply_physics(sys_root, None, dt)
                 p_time = c_time
+                ## print(tt.dur/dt)
                     
     def __init_Bodies(self, sys_recipe):
         sys = {}

@@ -1,5 +1,15 @@
 #version 440
 
+// Uniform.
+uniform vec3 light_vec;
+uniform float ambient_val;
+uniform vec4 terrain_specs; // (min_height, elev_range, terrain_count, ?)
+uniform vec3 tex_lod[4];
+uniform sampler2DArray near_tex;
+uniform sampler2DArray far_tex;
+
+uniform mat4 p3d_ModelViewMatrix;
+
 // In.
 in vec3 te_normal;
 in vec4 te_color;
@@ -12,14 +22,6 @@ in vec3 te_ter_blends;
 // Out.
 out vec4 o_color;
 
-// Uniform.
-uniform mat4 p3d_ModelViewMatrix;
-uniform vec3 light_dir;
-uniform float ambient_val;
-uniform vec4 terrain_specs; // (min_height, elev_range, terrain_count, ?)
-uniform vec3 tex_lod[4];
-uniform sampler2DArray near_tex;
-uniform sampler2DArray far_tex;
 
 // Find texture color based on its blending requirements (based
 // on the terrain of each vertex of the pixel's tri). Having this 
@@ -93,7 +95,7 @@ void main()
             
             // Check if the pixel's cam distance qualifies it for this level.
             if (te_dist > lod.x && te_dist <= lod.y) {
-                // The nearest LOD level use texture from 'near_tex';
+                // The nearest LOD level uses texture from 'near_tex';
                 // all subsequent levels use texture from 'far_tex'.
                 if (i == 0) {mix_tex_col = sample_texture(near_tex, lod.z);}
                 else {mix_tex_col = sample_texture(far_tex, lod.z);}
@@ -115,11 +117,10 @@ void main()
         color = mix(color, normalize(tex_col*color)*2.0, tex_master_blend);
     }
     // Lighting values.
-    vec3 eye_vec = te_eye_vec;
-    vec3 light_vec = (p3d_ModelViewMatrix * vec4(light_dir, 0.0)).xyz;
-    float intensity = max(dot(te_normal, light_vec), 0.0) * 4.0;
-    vec4 ambient = vec4(ambient_val, ambient_val, ambient_val, 1.0);
+    // vec3 light_vec = (p3d_ModelViewMatrix * vec4(light_vec, 0.0)).xyz;
+    // float intensity = max(dot(te_normal, light_vec), 0.0);
+    // vec4 ambient = vec4(ambient_val, ambient_val, ambient_val, 1.0);
     
     // Final output color.
-    o_color = max(color, ambient) * intensity;
+    o_color = color; // max(color, ambient) * intensity;
 }

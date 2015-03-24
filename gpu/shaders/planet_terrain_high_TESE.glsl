@@ -1,5 +1,17 @@
 #version 440
 
+// Uniform.
+uniform float radius;
+uniform vec4 terrain_specs; // (min_height, elev_range, terrain_count, ?)
+uniform sampler2D height_map;
+uniform sampler2D normal_map;
+uniform sampler2D colour_map;
+// uniform sampler2D p3d_Texture0;
+
+uniform mat4 p3d_ModelViewProjectionMatrix;
+uniform mat4 p3d_ModelViewMatrix;
+uniform mat3 p3d_NormalMatrix;
+
 // In.
 layout(triangles, fractional_even_spacing, ccw) in;
 in vec3 tc_verts[];
@@ -16,21 +28,11 @@ out vec3 te_eye_vec;
 out flat ivec3 te_ter_inds;
 out vec3 te_ter_blends;
 
-// Uniform.
-uniform float radius;
-uniform vec4 terrain_specs; // (min_height, elev_range, terrain_count, ?)
-uniform mat4 p3d_ModelViewProjectionMatrix;
-uniform mat4 p3d_ModelViewMatrix;
-uniform mat3 p3d_NormalMatrix;
-uniform sampler2D height_map;
-uniform sampler2D normal_map;
-uniform sampler2D col_map;
-
 
 // Main.
 void main()
 {
-    // Establish tesselated vert basic attrs.
+    // Establish tesselated vert pos.
     vec3 pA = gl_TessCoord.s * tc_verts[0];
     vec3 pB = gl_TessCoord.t * tc_verts[1];
     vec3 pC = gl_TessCoord.p * tc_verts[2];
@@ -60,7 +62,7 @@ void main()
     te_dist = length(gl_Position);
     
     // Color mapping.
-    te_color = texture(col_map, map_uv);
+    te_color = texture(colour_map, map_uv);
     
     // Terrain.
     te_ter_inds = ivec3(tc_ter_inds[0],tc_ter_inds[1],tc_ter_inds[2]);

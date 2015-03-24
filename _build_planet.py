@@ -15,21 +15,15 @@ from etc.util import TimeIt
 from planet_gen.model import Planet_Builder
 
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    qual = None
-    if args[0] in ("preview", "low", "high"):
-        qual = args.pop(0)
+    args = sys.argv
     if args[-1] == "all":
         args = listdir(Filename(_path.BODIES).toOsLongName())
-
+    else:
+        args = args[1:]
     pb = Planet_Builder()
-    if qual == "low": build = pb.build_low_models
-    elif qual == "high": build = pb.build_high_model
-    else: build = pb.build_all
-    
     for planet_name in args:
         if planet_name.startswith("."): continue
         with TimeIt(planet_name):
-            build(planet_name)
+            pb.build_models(planet_name)
 
 

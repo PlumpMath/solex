@@ -2,17 +2,21 @@
 warm terran Earth:
     $radius             6371
     $mass               5.9736*10**24
-    $sea_level          0
-    $sea_colour         (0, 0, .7, 1)
-    $height_max         50
-    $height_min         -50
+    $height_max         35
+    $height_min         -55
     $height_map         "earth_height.jpg"
     $normal_map         "earth_norm.jpg"
     $colour_map         "earth_colour.jpg"
     $terrain_map        "earth_ter.png"
     
-    $preview_mode       "detailed"
-    $pre_colour_map     "earth_colour_pre.jpg"
+    $sea_level          0
+    $sea_colour         (0, 0, .7, 1)
+    $atmos_ceiling      2000
+    $atmos_density      1
+    $atmos_colour       (.531, .809, .98, 1)
+    $atmos_alt_colour   (.992, .371, .328, 1)
+    
+    $lod_models         ["high", "mid", "low"]
     
     terrain Land:
         $alt_range  0->100
