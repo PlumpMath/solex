@@ -65,7 +65,6 @@ class Shader_Manager:
             model_np.setShaderInput("atmos_colour", LVector4f(*planet.atmos_colour))
             model_np.setShaderInput("atmos_ceiling", planet.atmos_ceiling)
             model_np.setShaderInput("atmos_radius", planet.radius+planet.atmos_ceiling)
-            ## model_np.setShaderInput("atmos_vals", LVector4f(0,0,0,0))
         
         # Mid model.
         if model_type == "mid" and "colour_map" in planet.__dict__:
@@ -103,7 +102,7 @@ class Shader_Manager:
             
             # Env vars.
             planet.MODEL_NP.setShaderInput("cull_dist", 999999999999999999)
-            ## model_np.setAttrib(RenderModeAttrib.make(2))
+            ## model_np.setAttrib(RenderModeAttrib.make(2))  # Wireframe.
              
             # Terrain specs.
             min_radius = planet.radius - planet.height_min

@@ -31,17 +31,17 @@ expanded="cslos77.20150302085211.7,"><vh>@shadow client.py</vh></v>
 <v t="cslos77.20150302085211.5"><vh>@shadow server.py</vh></v>
 </v>
 <v t="cslos77.20141120192122.10" a="E"><vh>@path solex</vh>
-<v t="cslos77.20150302085211.122" a="E"><vh>@shadow environments.py</vh></v>
+<v t="cslos77.20150302085211.122" a="E"
+expanded="cslos77.20141120192122.18,"><vh>@shadow environments.py</vh></v>
 <v t="cslos77.20150302085211.123" a="E"
-expanded="cslos77.20150302085211.127,"><vh>@shadow bodies.py</vh></v>
-<v t="cslos77.20141120192122.13"
-expanded="cslos77.20141120192122.15,cslos77.20141122021629.3,cslos77.20150302085211.131,"><vh>@shadow cameras.py</vh></v>
+expanded="cslos77.20150302085211.128,cslos77.20150302085211.127,"><vh>@shadow bodies.py</vh></v>
+<v t="cslos77.20141120192122.13"><vh>@shadow cameras.py</vh></v>
 <v t="cslos77.20141122021629.8" a="E"
 expanded="cslos77.20141122021629.12,"><vh>@shadow shader.py</vh></v>
 <v t="cslos77.20150302085211.104"
 expanded="cslos77.20150302085211.105,"><vh>@shadow simulator.py</vh></v>
 </v>
-<v t="cslos77.20141120192122.8" a="E"><vh>@path planet_gen</vh>
+<v t="cslos77.20141120192122.8"><vh>@path planet_gen</vh>
 <v t="cslos77.20141120192122.28"
 expanded="cslos77.20141120192122.29,"><vh>@shadow planet_gen.py</vh></v>
 <v t="cslos77.20141120192122.52"><vh>@shadow model.py</vh></v>
@@ -52,7 +52,7 @@ expanded="cslos77.20141120192122.29,"><vh>@shadow planet_gen.py</vh></v>
 <v t="cslos77.20150302085211.12" a="E"
 expanded="cslos77.20150302085211.13,cslos77.20150302085211.33,cslos77.20150302085211.35,cslos77.20150302085211.46,cslos77.20150302085211.47,cslos77.20150302085211.62,"><vh>@shadow p3gui.py</vh></v>
 </v>
-<v t="cslos77.20150302085211.8"
+<v t="cslos77.20150302085211.8" a="E"
 expanded="cslos77.20150302085211.138,cslos77.20150312034730.4,"><vh>@shadow gui.py</vh></v>
 </v>
 <v t="cslos77.20141129025015.19" a="E"><vh>@path gpu</vh>
@@ -64,19 +64,23 @@ expanded="cslos77.20150302085211.138,cslos77.20150312034730.4,"><vh>@shadow gui.
 <v t="cslos77.20141129025015.21"><vh>@shadow panda3d_gpu.py</vh></v>
 <v t="cslos77.20141125093326.15"><vh>@shadow gpu_image_lib.glsl</vh></v>
 <v t="cslos77.20141122021629.9" a="E"><vh>@path shaders</vh>
+<v t="cslos77.20150319095529.20" a="E"><vh>env</vh>
+<v t="cslos77.20150319095529.22"><vh>@shadow env_atmos_VERT.glsl</vh></v>
+<v t="cslos77.20150319095529.23"><vh>@shadow env_atmos_FRAG.glsl</vh></v>
+</v>
 <v t="cslos77.20150319095529.16" a="E"><vh>planet atmos</vh>
 <v t="cslos77.20150319095529.17"><vh>@shadow planet_atmos_VERT.glsl</vh></v>
 <v t="cslos77.20150319095529.18"><vh>@shadow planet_atmos_FRAG.glsl</vh></v>
 </v>
-<v t="cslos77.20150317075124.8" a="E"><vh>planet low</vh>
+<v t="cslos77.20150317075124.8"><vh>planet low</vh>
 <v t="cslos77.20150317075124.9"><vh>@shadow planet_terrain_low_VERT.glsl</vh></v>
 <v t="cslos77.20150317075124.10"><vh>@shadow planet_terrain_low_FRAG.glsl</vh></v>
 </v>
-<v t="cslos77.20150319095529.7" a="E"><vh>planet mid</vh>
+<v t="cslos77.20150319095529.7"><vh>planet mid</vh>
 <v t="cslos77.20150319095529.9"><vh>@shadow planet_terrain_mid_VERT.glsl</vh></v>
 <v t="cslos77.20150319095529.10"><vh>@shadow planet_terrain_mid_FRAG.glsl</vh></v>
 </v>
-<v t="cslos77.20150317075124.7" a="E"><vh>planet high</vh>
+<v t="cslos77.20150317075124.7"><vh>planet high</vh>
 <v t="cslos77.20141122021629.10"><vh>@shadow planet_terrain_high_VERT.glsl</vh></v>
 <v t="cslos77.20141125093326.4"><vh>@shadow planet_terrain_high_TESC.glsl</vh></v>
 <v t="cslos77.20141125093326.5"><vh>@shadow planet_terrain_high_TESE.glsl</vh></v>
@@ -335,6 +339,8 @@ pos = position($TARGET)
 <t tx="cslos77.20150317075124.8">@others
 </t>
 <t tx="cslos77.20150319095529.16">@others
+</t>
+<t tx="cslos77.20150319095529.20">@others
 </t>
 <t tx="cslos77.20150319095529.7"></t>
 </tnodes>

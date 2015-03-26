@@ -399,23 +399,21 @@ class Env_Win(_Window_):
     class Focus_Banner(gui.Text):
         text = "-none-"
         font = {'name':"arial.ttf",'size':48,'colour':MENU_COL}
-        place = {'anchor':"ne",'top':10,'right':0}
+        place = {'anchor':"ne",'top':20,'right':12}
         bg = (0,0,0,.5)
 
     class Focus_Dist(gui.Text):
         text = "-none-"
         font = {'name':"arial.ttf",'size':20,'colour':(.5,.5,.5,1)}
-        place = {'anchor':"ne",'top':64,'right':0}
+        place = {'anchor':"ne",'top':82,'right':12}
         bg = (0,0,0,.5)
     
     children = [Focus_Banner,
                 Focus_Dist]
                 
 
-
     def _update_(self, ue, dt):
-        focus_dist = str(round(self.CTRL.client.ENV.CAMERA.focus_pos.length(), 2))
-        ## print(focus_dist)
+        focus_dist = str(int(self.CTRL.client.ENV.CAMERA.focus_pos.length()))
         self.c_dict['env_win.focus_dist'].set_text(focus_dist)
 
 

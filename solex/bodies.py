@@ -62,10 +62,42 @@ class _Body_:
         self.sys_hpr = LVector3f(0,0,0)
         self.sys_rot = LVector3f(0,0,0)
         self.POS = LVector3f(0,0,0)
+        self.far_radius = _env.ATMOS_RADIUS - self.radius
+        self.near_radius = 0
         self._mode = "far"
-        self._lod = "low"
+        ## self._lod = "low"
         self._loaded = False
     
+    def _update_(self, ue, dt, cam):
+        if not self._loaded: return
+        body_pos = self.sys_pos - cam.sys_pos
+        dist_from_cam = body_pos.length()
+        
+        # Switch Far/Near modes when necessary.
+        if dist_from_cam >= self.far_radius:
+            # Far mode - planet recedes no further but shrinks to mimic
+            # recession, otherwise it would move beyond cam.FAR and be culled.
+            scale = self.far_radius / dist_from_cam
+            scale *= ((self.far_radius+((1-scale)*self.radius))/self.far_radius)
+            body_pos *= scale
+            self.MODEL_NP.setScale(scale)
+            if self._mode == "near":
+                self._mode = "far"
+        elif self._mode == "far" and dist_from_cam < self.far_radius:
+            # Near mode - planet moves normally.
+            self.MODEL_NP.setScale(1.0)
+            self._mode = "near"
+                
+        # Update body state.
+        self.MODEL_NP.setPos(*body_pos)
+        self.sys_pos += (self.sys_vec*dt)
+        self.render_pos = body_pos
+        
+        self._post_update_(dist_from_cam)
+        
+    def _post_update_(self, dist_from_cam):
+        pass
+
     def _gen_Sphere_Model(self, colour=[]):
         model_path = "{}/sphere_low_5.bam".format(_path.MODELS)
         model_np = loader.loadModel(model_path).getChild(0)
@@ -103,32 +135,6 @@ class Star(_Body_):
         self._loaded = True
         
 
-    def _update_(self, ue, dt, cam, far_radius=_env.ATMOS_RADIUS):
-        if not self._loaded: return
-        body_pos = self.sys_pos - cam.sys_pos
-        dist_from_cam = body_pos.length()
-        
-        # Switch Far/Near modes when necessary.
-        if dist_from_cam >= far_radius:
-            # Far mode - planet recedes no further but shrinks to mimic
-            # recession, otherwise it would move beyond cam.FAR and be culled.
-            scale = far_radius / dist_from_cam
-            body_pos *= scale
-            self.MODEL_NP.setScale(scale)
-            if self._mode == "near":
-                self._mode = "far"
-        elif self._mode == "far" and dist_from_cam < far_radius:
-            # Near mode - planet moves normally.
-            self.MODEL_NP.setScale(1.0)
-            self._mode = "near"
-                
-        # Update body state.
-        self.MODEL_NP.setPos(*body_pos)
-        self.sys_pos += (self.sys_vec*dt)
-        
-
-        
-        
 
 class Planet(_Body_):
     
@@ -164,25 +170,7 @@ class Planet(_Body_):
         self.__Reset()
         
         
-    def _update_(self, ue, dt, cam, far_radius=_env.ATMOS_RADIUS):
-        if not self._loaded: return
-        body_pos = self.sys_pos - cam.sys_pos
-        dist_from_cam = body_pos.length()
-        
-        # Switch Far/Near modes when necessary.
-        if dist_from_cam >= far_radius:
-            # Far mode - planet recedes no further but shrinks to mimic
-            # recession, otherwise it would move beyond cam.FAR and be culled.
-            scale = far_radius / dist_from_cam
-            body_pos *= scale
-            self.MODEL_NP.setScale(scale)
-            if self._mode == "near":
-                self._mode = "far"
-        elif self._mode == "far" and dist_from_cam < far_radius:
-            # Near mode - planet moves normally.
-            self.MODEL_NP.setScale(1.0)
-            self._mode = "near"
-            
+    def _post_update_(self, dist_from_cam, body_pos=LVector3f(0,0,0)):
         # Switch model LOD.
         for near, far in self.__lod_list:
             if dist_from_cam >= near and dist_from_cam < far:
@@ -190,22 +178,37 @@ class Planet(_Body_):
                     self.show_model(near)
                 break
 
-        # State.
-        self.MODEL_NP.setPos(*body_pos)
-        self.sys_pos += (self.sys_vec*dt)
-        
         # Shader updates.
-        if dist_from_cam < far_radius:
+        if dist_from_cam < self.near_radius:
             cull_dist = dist_from_cam**2 - self.radius**2
             self.MODEL_NP.setShaderInput("cull_dist", cull_dist)
+            
         if "atmos_ceiling" in self.__dict__:
-            atmos_vals = LVector4f(dist_from_cam, dist_from_cam-self.radius,
-                                   abs(degrees(asin(self.radius/dist_from_cam))),
-                                   abs(degrees(asin(min((self.radius+self.atmos_ceiling)/dist_from_cam,1)))))
-            self.MODEL_NP.setShaderInput("atmos_vals", atmos_vals)
-            body_pos.normalize()
-            self.MODEL_NP.setShaderInput("body_dir", LVector3f(*body_pos))
-        
+            # The outer 'env.atmos_sphere_np' completes its fade in at the halfway height
+            # between the planet's 'sea_level' and 'atmos_ceiling' values; while the
+            # inner 'atmos_np' of this planet completes its fade out at the same point.
+            cam_height = dist_from_cam - self.radius
+            half_ceiling = self.atmos_ceiling / 2
+            atmos_np = self.current_model_np.find("atmos")
+            if cam_height < half_ceiling:
+                atmos_np.hide()
+            else:
+                atmos_np.show()
+                fade_multi = 1
+                if cam_height < self.atmos_ceiling:
+                    fade_multi = min((cam_height-half_ceiling)/half_ceiling, 1)
+                
+                # Better to determine body and atmos angles here and pass them to shader,
+                # rather than having them recalculated for every pixel. See 'planet_atmos_FRAG'
+                # for their use.
+                body_angle = abs(degrees(asin(self.radius/dist_from_cam)))
+                atmos_angle = abs(degrees(asin(min((self.radius+self.atmos_ceiling)/dist_from_cam,1))))
+                atmos_vals = LVector4f(dist_from_cam, fade_multi, body_angle, atmos_angle)
+                self.MODEL_NP.setShaderInput("atmos_vals", atmos_vals)
+                # 'body_dir' allows the 
+                body_pos.set(*self.render_pos)
+                body_pos.normalize()
+                self.MODEL_NP.setShaderInput("body_dir", LVector3f(*body_pos))
 
     def __load_Models(self):
         
@@ -216,6 +219,9 @@ class Planet(_Body_):
             model_np.stashTo(self.MODEL_NP)
             self.__models[near] = model_np
             SM.set_planet_shaders(self, model_np, model_type)
+            atmos_np = model_np.find("atmos")
+            if atmos_np:
+                atmos_np.setBin("fixed", 20)
             if len(self.__models) == len(self.lod):
                 self.show_model(near)
                 self._loaded = True
@@ -228,6 +234,8 @@ class Planet(_Body_):
             loader.loadModel(model_file, callback=_on_load_model, extraArgs=[near, mod_type])
             self.__lod_list.append((near,far))
             far = near
+        
+        self.near_radius = self.__lod_list[-1][1]
 
     def __Reset(self):
         self.current_model_np = None

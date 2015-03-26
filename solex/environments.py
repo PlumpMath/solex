@@ -5,11 +5,12 @@
 # System.
 
 # Panda3d.
-from panda3d.core import NodePath, Filename ##  DirectionalLight
-
+from panda3d.core import NodePath, Filename, Shader, LVector4f
+from panda3d.core import CullFaceAttrib, TransparencyAttrib
 # Local.
 from etc.settings import _path, _sys, _env
 from gui.gui import Lobby_Win, Pre_View_Win, Env_Win
+from solex.bodies import Model
 from solex.cameras import *
 
 
@@ -172,14 +173,7 @@ class Environment:
         for cam in self.cam_list:
             cam.set_focus(obj)
     def change_camera(self):
-        self.cam_list.reverse()
-        cam = self.cam_list[0]
-        old_cam = self.CAMERA
-        cam.sys_pos = self.CAMERA.sys_pos
-        cam.focus_pos = self.CAMERA.focus_pos
-        self.CAMERA = cam
-        self.client._display_region.setCamera(self.CAMERA.NP)
-        self.CAMERA.switch_to(old_cam)
+        self.__change_Camera()
     def add_object(self, obj_id, obj):
         obj.load()
         self.live_object_ids.add(obj_id)
@@ -199,9 +193,13 @@ class Environment:
         self.GUI = Env_Win(ctrl=self)
         self.GUI.render()
         self.GUI.NP.hide()
+        # Background.
         self.star_sphere_np = NodePath("dummy")
+        self.atmos_sphere_np = self.__build_Atmos_Sphere()
+        # Objects.
         self.LIVE_OBJECTS = {}
         self.live_object_ids = set()
+        # Cameras.
         self.cam_list = [Orbital_Camera(self), Surface_Camera(self)]
         self.CAMERA = self.cam_list[0]
         
@@ -210,11 +208,11 @@ class Environment:
 
 
     
-    def _main_loop_(self, ue, dt):
+    def _main_loop_(self, ue, dt, atmos_col=LVector4f(0,0,0,0), body_dir=LVector3f(0,0,0)):
         # User events.
         self._handle_user_events_(ue, dt)
         self.CAMERA._handle_user_events_(ue, dt)
-        ## print(dt)
+        
         # System State.
         light_vec = self.client.SYS.STARS[0].MODEL_NP.getPos()
         light_vec.normalize()
@@ -222,6 +220,25 @@ class Environment:
         for obj_id, obj in self.LIVE_OBJECTS.items():
             obj._update_(ue, dt, cam)
             obj.MODEL_NP.setShaderInput("light_vec", light_vec)
+            
+            # Atmosphere effects for bg atmos sphere.
+            if obj is self.CAMERA.FOCUS and "atmos_ceiling" in obj.__dict__:
+                cam_height = self.CAMERA.focus_pos.length() - obj.radius
+                if cam_height < obj.atmos_ceiling:
+                    # Full oppacity at 1/2 ceiling.
+                    half_ceiling = obj.atmos_ceiling / 2
+                    atmos_col.set(*obj.atmos_colour)
+                    atmos_col *= max(min((1-(cam_height-half_ceiling)/half_ceiling),1),0)
+                    # Day/night fades in/out along a band that extends
+                    # around the planet along the terminator.
+                    body_dir.set(*obj.render_pos)
+                    body_dir.normalize()
+                    night_factor = max(min(((1-(body_dir.dot(light_vec)*.5+.5))-.45)*10,1),0)
+                    atmos_col *= night_factor
+                else:
+                    atmos_col.set(0,0,0,0)
+                self.atmos_sphere_np.setShaderInput("atmos_colour", atmos_col)
+                
         # Gui.
         self.GUI._main_loop_(ue, dt)
 
@@ -232,20 +249,15 @@ class Environment:
         elif "exit_to_pre_view" in cmds:
             self.to_pre_view()
 
-    def __change_Camera(self, cam_type=""):
-        # No 'cam_type' means just get next cam in 'self.cam_list'.
-        if not cam_type:
-            cci = self.cam_list.index(self.current_cam_type)    # cci -> current cam index.
-            if cci == len(self.cam_list)-1:
-                cam_type = self.cam_list[0]
-            else:
-                cam_type = self.cam_list[cci+1]
-        
-        # Set cam to 'cam_type'.
-        Cam_Cls = eval("{}_Camera".format(cam_type.title()))
-        self.CAMERA.__class__ = Cam_Cls
-        self.CAMERA.switch_to()
-        return cam_type
+    def __change_Camera(self):
+        self.cam_list.reverse()
+        cam = self.cam_list[0]
+        old_cam = self.CAMERA
+        cam.sys_pos = self.CAMERA.sys_pos
+        cam.focus_pos = self.CAMERA.focus_pos
+        self.CAMERA = cam
+        self.client._display_region.setCamera(self.CAMERA.NP)
+        self.CAMERA.switch_to(old_cam)
 
     def __build_Star_Sphere(self, bg_stars):
         from panda3d.core import GeomVertexWriter, GeomVertexFormat, GeomVertexData
@@ -270,13 +282,30 @@ class Environment:
         star_sphere = GeomNode("star_sphere")
         star_sphere.addGeom(bg_stars_geom)
         star_sphere_np = NodePath(star_sphere)
-            
-        bg_star_light = AmbientLight("bg_star_light")
-        bg_star_light.setColor((0.4, 0.4, 0.4, 1))
-        bg_star_light_np = render.attachNewNode(bg_star_light)
-        star_sphere_np.setLight(bg_star_light_np)
+
         star_sphere_np.reparentTo(self.NP)
         return star_sphere_np
+
+    def __build_Atmos_Sphere(self):
+        sphere_path = "{}/sphere_simp_6.bam".format(_path.MODELS)
+        atmos_model_np = loader.loadModel(sphere_path).getChild(0)
+        atmos_model_np.setName("atmos")
+        atmos_model = Model(atmos_model_np)
+        
+        pts = atmos_model.read("vertex")
+        pts = list(map(lambda pt: pt*_env.ATMOS_RADIUS, pts))
+        atmos_model.modify("vertex", pts)
+        atmos_model.NP.setAttrib(CullFaceAttrib.make(CullFaceAttrib.MCullCounterClockwise))
+        atmos_model.NP.setAttrib(TransparencyAttrib.make(TransparencyAttrib.MAlpha))
+        
+        atmos_vert_path = "{}/env_atmos_VERT.glsl".format(_path.SHADERS)
+        atmos_frag_path = "{}/env_atmos_FRAG.glsl".format(_path.SHADERS)
+        atmos_shader = Shader.load(Shader.SL_GLSL, atmos_vert_path, atmos_frag_path)
+        atmos_model.NP.setShader(atmos_shader)
+        atmos_model.NP.setShaderInput("atmos_colour", LVector4f(0,0,0,0))
+        atmos_model.NP.setBin("fixed", 10)
+        atmos_model.NP.reparentTo(self.NP)
+        return atmos_model.NP
 
 
 

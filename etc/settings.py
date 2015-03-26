@@ -28,8 +28,8 @@ class _phys:
 # Environment.
 class _env:
     STAR_COUNT = 15000
-    STAR_RADIUS = 889999
-    ATMOS_RADIUS = 880000
+    STAR_RADIUS = 890000
+    ATMOS_RADIUS = 800000
     AMBIENT = 0.02
 
 # Simulator.
